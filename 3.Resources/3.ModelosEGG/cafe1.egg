@@ -1,0 +1,14 @@
+<CoordinateSystem> { Z-up }
+
+<Comment> { "Egg laid by Chicken for Blender, version R91" }
+
+<Group>  {
+  <Transform> {
+    <Matrix4> {
+      1.000000 0.000000 0.000000 0.000000
+      0.000000 1.000000 0.000000 0.000000
+      0.000000 0.000000 1.000000 0.000000
+      -6.344522 7.892708 0.000000 1.000000
+    }
+  }
+}

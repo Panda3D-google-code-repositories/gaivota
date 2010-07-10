@@ -624,31 +624,38 @@ class MessageManager(DirectObject.DirectObject): #Class that control messages
 class StartMenu(DirectObject.DirectObject): #Class for main menu
     def __init__(self,cond=1): #Class constructor
         
-        self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
-        self.frame['frameColor']=(0.8,0.8,0.8,1)
+        self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
+        self.frame2 = DirectFrame(parent=render2d, image="media\TitleScreen.jpg", sortOrder=(-1))
+        #self.frame['frameColor']=(0.8,0.8,0.8,0)
 
-        self.headline = DirectLabel(parent=self.frame, text="GAIVOTA", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
+        #self.headline = DirectLabel(parent=self.frame, text="GAIVOTA", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         
-        self.graphicsButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
-        self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
-        self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(0,0,-0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        self.startButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(1,0,-0.5), text_scale=0.08, text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0)) 
+        self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(1,0,-0.6), text_scale=0.08, text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
+        self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(1,0,-0.7), text_scale=0.08, text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         
         self.showMenu()
+        self.credits = Credits()
+        #Carrega Imagem do Inicio (TitleScreen)
         
-        self.credits = Credits()  
+        #b=OnscreenImage(parent=render2d, image="media\TitleScreen.jpg")
+        #base.cam.node().getDisplayRegion(0).setSort(20)  
+        
     def showMenu(self): #Function that show menu
         self.frame.show()
+        self.frame2.show()
         # send an event for the player class
         messenger.send( "startMenuOpen" )    
     def hideMenu(self): #Function that hide menu
-        self.frame.hide()
+        self.frame.destroy()
+        self.frame2.destroy()
         # send an event for the player class
         messenger.send( "startMenuClosed" )    
     def doStartGame(self): #Function that show graphic settings
         self.hideMenu()
         Game()     
     def showCredits(self): #Function that show credits
-        self.credits
+        self.credits.show()
 class MainMenu(DirectObject.DirectObject):
     def __init__(self,cond=1): #Class constructor
         
@@ -688,7 +695,8 @@ class GameOverMenu(DirectObject.DirectObject):
         self.headline = DirectLabel(parent=self.frame, text="GAME OVER", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         
         self.retryButton = DirectButton(parent=self.frame, text="Retry", command=self.doRestart, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
-        self.giveupButton = DirectButton(parent=self.frame, text="Give Up!", command=self.showEndingCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        #self.giveupButton = DirectButton(parent=self.frame, text="Give Up!", command=self.showEndingCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        self.giveupButton = DirectButton(parent=self.frame, text="Give Up!", command=sys.exit, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
         
         self.acceptOnce('escape', self.hideMenu)
         
@@ -752,7 +760,7 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor
         #available resolutions and multisampling levels
-        self.resolutions = ['800 600', '1024 768', '1152 864', '1280 960', '1440 900', '1680 1050']
+        self.resolutions = ['800 600', '1024 768', '1152 864', '1280 720', '1280 960', '1440 900', '1680 1050', '1920 1080']
         self.multisampling = ["0", "2","4","8","16"]
         
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,1), pos=(0,0,0))

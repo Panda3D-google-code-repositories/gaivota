@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------------------
+Modificações:
+--------------------------------------------------------------------------------------------
+
+1.comentario melhorado
+2.habilita e desabilita fisica quando abre e fecha menu(ESC)
+3.retirada da visualização do speed e health(apens foi comentado o trecho do código)
+4.musica de fundo(diminui quando menu aberto)
+5.som de explosão e game over(precisa ser alterado mas funcionalidade já implementada)
+----
+6.adição do cenário, cubo com colisão(sugestão do professor)
+
+OBS:
+a)O cubo foi adicionado mas quando aumenta a escala o avião fica dentro do cubo mas não 
+consigo ver as paredes do cubo. A colisão funciona perfeitamente, fora e dentro do cubo.
+
+b)não consegui colocar textura dentro do cubo para ver a parte de dentro.

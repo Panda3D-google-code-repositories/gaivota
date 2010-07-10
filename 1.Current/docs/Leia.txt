@@ -1,0 +1,59 @@
+**************************
+* Gaivota (baseado no..) *
+* Flight game by Akuryou *
+**************************
+
+Controls:
+- esc: open main menu
+- move mouse to turn around
+- mouse wheel: speed +/-
+- right mouse button: speed boost
+- f key: free look mode (take a look behind you)
+
+
+**************************
+*       Changelog        *
+**************************
+
+v0.05
++Finite State Machine (FSM) to control stages
++Intro Movie
++Intro Menu
++Game and GameOver on FSM
++New level design
++Fixed collisions
+
+v0.04
+-Removed Landing/Starting
+-Credits updated
+-Model replacement: chair for small islands
+-Fixed: Wind sound plays according to plane's speed
+-Fixed: Turbo mode conflict with mouse event task.
+-Load Model call modified
+-Logo added to project status page
+-Added gravity
+
+v0.03
+-Removed Towers and Missiles
+-Set start speed to 10
+-Fixed engine sound volume
+-Main Menu text updated
+
+V0.02
+-Removed Plane Contrail
+-Sound replacement: wind sound instead of engine
+-Camera tweak
+-Minor Edit: Credits
+
+v0.01
+-Model replacement: Paper Plane instead of Griffin
+-Flight Game by Akuryou
+
+**************************
+*       Known Bugs       *
+**************************
+
+1) Glitch: You can't collide with some objects
+2) Speedmeter is not counting gravity effect on speed
+3) Glitch: When you die, gravity ignores collision
+4) Bug: When you die, the mouse cursor gets blocked/hidden

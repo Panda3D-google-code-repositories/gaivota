@@ -549,7 +549,7 @@ class Player(object, DirectObject.DirectObject):
         self.node.removeNode()
         #hide cursor image after death
         self.myImage.hide()
-        messenger.send( 'player-death'     
+        messenger.send( 'player-death' ) 
     def evtSpeedUp(self): #Function that conrol event that increse speed
         if self.landing:
             return 0 
@@ -627,28 +627,26 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
         self.frame['frameColor']=(0.8,0.8,0.8,1)
 
-        self.headline = DirectLabel(parent=self.frame, text="Main Menu", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
+        self.headline = DirectLabel(parent=self.frame, text="GAIVOTA", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         
-        self.graphicsButton = DirectButton(parent=self.frame, text="Graphics Settings", command=self.showGraphicsSettings, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
+        self.graphicsButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
         self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
         self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(0,0,-0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
-        self.backButton = DirectButton(parent=self.frame, text="Resume", command=self.hideMenu, pos=(0,0,-0.3), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
         
-        self.hideMenu()
-        self.accept('escape', self.showMenu)
+        self.showMenu()
         
-        self.graphicsSettings = GraphicsSettings()
         self.credits = Credits()  
     def showMenu(self): #Function that show menu
         self.frame.show()
         # send an event for the player class
-        messenger.send( "menuOpen" )    
+        messenger.send( "startMenuOpen" )    
     def hideMenu(self): #Function that hide menu
         self.frame.hide()
         # send an event for the player class
-        messenger.send( "menuClosed" )    
-    def showGraphicsSettings(self): #Function that show graphic settings
-        self.graphicsSettings.show()      
+        messenger.send( "startMenuClosed" )    
+    def doStartGame(self): #Function that show graphic settings
+        self.hideMenu()
+        Game()     
     def showCredits(self): #Function that show credits
         self.credits
 class MainMenu(DirectObject.DirectObject):
@@ -680,7 +678,7 @@ class MainMenu(DirectObject.DirectObject):
     def showGraphicsSettings(self): #Function that show graphic settings
         self.graphicsSettings.show()       
     def showCredits(self): #Function that show credits
-        self.credits.show(
+        self.credits.show()
 class GameOverMenu(DirectObject.DirectObject):
     def __init__(self,cond=1):#Class constructor
         
@@ -872,5 +870,5 @@ class Credits(DirectObject.DirectObject):
         self.frame.show()
     def hide(self): #Function that hide the window
         self.frame.hide()
-Game()
+StartMenu()
 run()

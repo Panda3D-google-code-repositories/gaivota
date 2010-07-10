@@ -508,15 +508,21 @@ class Player(object, DirectObject.DirectObject):
             if self.HP == 0:
                     #hide cursor image during death animation
                     self.myImage.hide()
-                    #"stop" gravity
-                    #self.gravityForce=LinearVectorForce(0,0,0)
                     self.explode()
+                    #disable physics when hit
+                    base.disableParticles()
+                    #control volume
+                    self.engineSound.stop()
+                    self.MusicSound.setVolume(0.5)
             else:
                     #hide cursor image during death animation
                     self.myImage.hide()
-                    #"stop" gravity
-                    #self.gravityForce=LinearVectorForce(0,0,0)
-                    self.explode()    
+                    self.explode()
+                    #disable physics when hit
+                    base.disableParticles()
+                    #control volume
+                    self.engineSound.stop()
+                    self.MusicSound.setVolume(0.5)    
     def evtFreeLookON(self): #Function for freelook on
         if self.landing == False:
             self.freeLook = True

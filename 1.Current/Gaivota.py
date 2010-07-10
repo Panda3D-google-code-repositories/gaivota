@@ -6,7 +6,7 @@ Marco ~ Julho de 2010
 Authors: Filipe Yamamoto, Fabio Castanheira, Miguel Fernandes
 Site: http://code.google.com/p/gaivota/
 Blog: http://gaivotagame.blogspot.com
-Version: 0.0542 (Pre-Alpha)
+Version: 0.057 (Pre-Alpha)
 
 Check out our site to see project details
 '''
@@ -30,16 +30,9 @@ import math
 import sys
 
 loadPrcFile("cfg.prc")
-#----------------------------------------------------------------------------------------
 
-#------------------------------------------------------------------------------------------------------
-#Class enviroment for construct enviroment
-#------------------------------------------------------------------------------------------------------
-class Environment(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------
-    def __init__(self):
+class Environment(DirectObject.DirectObject): #Class environment for construct environment
+    def __init__(self): #Class constructor
         print "Loading (Level)"
         # add light
         dlight = DirectionalLight('my dlight')
@@ -214,24 +207,17 @@ class Environment(DirectObject.DirectObject):
         # since the terrain has no collisionNode attached, it is necessary to set the mask
         self.terrainCol.setCollideMask(BitMask32.allOn())
         self.terrainCol.flattenLight()
-        #---------------------------------------------------------------------------------
-        '''
-    '''    
-    #------------------------------------------------------------------------------------------------------
-    #Function to update sky
-    #------------------------------------------------------------------------------------------------------
-    def updateSky(self, task):
+
+        #Function to update sky
+        def updateSky(self, task):
         pos = base.camera.getPos(render)
         return task.cont
-    '''
+        '''
 #------------------------------------------------------------------------------------------------------
 #Class Player for the airplane
 #------------------------------------------------------------------------------------------------------
 class Player(object, DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self): #Class constructor
         self.node = 0 #the player main node
         self.modelNode = 0 #the node of the actual model
         self.cNode = 0 #the player collision node attached to node
@@ -339,11 +325,7 @@ class Player(object, DirectObject.DirectObject):
         base.camera.reparentTo(self.node)
         base.camera.setPos(0,self.zoom,2)
         base.camera.lookAt(self.aimNode)
-    
-    #------------------------------------------------------------------------------------------------------
-    #Functions for airplane events
-    #------------------------------------------------------------------------------------------------------
-    def addEvents(self):
+    def addEvents(self):#Functions for airplane events
         self.accept( "wheel_up" , self.evtSpeedUp )
         self.accept( "wheel_down" , self.evtSpeedDown )
         self.accept('hit',self.evtHit)
@@ -352,11 +334,7 @@ class Player(object, DirectObject.DirectObject):
         self.accept('mouse3',self.evtBoostOn)
         self.accept("menuOpen", self.evtMenuOpen)
         self.accept("menuClosed", self.evtMenuClose)
-        
-    #------------------------------------------------------------------------------------------------------
-    #Functions that add collisions for the airplane
-    #------------------------------------------------------------------------------------------------------
-    def addCollisions(self):
+    def addCollisions(self): #Functions that add collisions for the airplane
         self.cNode = CollisionNode('player')
         self.cNode.addSolid(CollisionSphere(0,0,0,2.3))
         self.cNode.setFromCollideMask(BitMask32(0x1A))
@@ -376,11 +354,7 @@ class Player(object, DirectObject.DirectObject):
         self.landingCNodeSegmentPath = self.node.attachNewNode(self.landingCNodeSegment)
         #self.landingCNodeSegmentPath.show()
         base.cTrav.addCollider(self.landingCNodeSegmentPath, self.collisionHandlerQueue)
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function to add sound to airplane
-    #------------------------------------------------------------------------------------------------------    
-    def addSound(self):
+    def addSound(self): #Function to add sound to airplane
         self.engineSound = loader.loadSfx("engine.mp3")
         self.engineSound.setLoop(True)
         self.engineSound.play()
@@ -388,24 +362,15 @@ class Player(object, DirectObject.DirectObject):
         self.engineSound.setPlayRate(0)
         
         #Add environment music
-        #-------------------------------------------------------------------------------
         self.MusicSound = loader.loadSfx("warm-interlude.mp3")
         self.MusicSound.setLoop(True)
         self.MusicSound.play()
         self.MusicSound.setVolume(1.5)
         self.MusicSound.setPlayRate(0)
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function to delete task
-    #------------------------------------------------------------------------------------------------------
-    def deleteTask(self, task):
+    def deleteTask(self, task): #Function to delete task
         self.__del__()
-        return task.done
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that update mouse moviments
-    #------------------------------------------------------------------------------------------------------    
-    def mouseUpdateTask(self,task):
+        return task.done   
+    def mouseUpdateTask(self,task): #Function that update mouse moviments
         md = base.win.getPointer(0)
         x = md.getX()
         y = md.getY()
@@ -476,11 +441,7 @@ class Player(object, DirectObject.DirectObject):
         
         #self.node.setPos(self.node,self.strafe*globalClock.getDt()*self.speed)
         return task.cont  
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that control the explosion of the airplane
-    #------------------------------------------------------------------------------------------------------
-    def explode(self):
+    def explode(self): #Function that control the explosion of the airplane
         self.ignoreAll()
         self.cNode.setIntoCollideMask(BitMask32.allOff())
         taskMgr.remove(self.moveTask)
@@ -500,29 +461,19 @@ class Player(object, DirectObject.DirectObject):
         self.contrail2.cleanup()
         
         #add explosion sound
-        #------------------------------------------------------------------------------
         self.audio3d = Audio3DManager.Audio3DManager(base.sfxManagerList[0], base.camera)
         self.audio3d.setDropOffFactor(0.2)
         self.Sound = self.audio3d.loadSfx('explosion.mp3')
         self.audio3d.detachSound(self.Sound)
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
-        #------------------------------------------------------------------------------
         
         self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')    
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function for zoom
-    #------------------------------------------------------------------------------------------------------
-    def zoomTask(self, task):
+    def zoomTask(self, task): #Function for zoom
         if base.camera.getY() != self.zoom and self.freeLook == False:
             base.camera.setY( base.camera.getY()+ (self.zoom- base.camera.getY())*globalClock.getDt()*2 )
         return task.cont
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that increase speed 
-    #------------------------------------------------------------------------------------------------------
-    def evtBoostOn(self):
+    def evtBoostOn(self): #Function that increase speed 
         #taskMgr.remove(self.mouseTask)
         self.ignore( "wheel_up")
         self.ignore( "wheel_down")
@@ -537,9 +488,9 @@ class Player(object, DirectObject.DirectObject):
         self.evtFreeLookOFF()
     
     #------------------------------------------------------------------------------------------------------
-    #Function that decrease speed
+    
     #------------------------------------------------------------------------------------------------------
-    def evtBoostOff(self):
+    def evtBoostOff(self): #Function that decrease speed
         self.speed -=200
         #self.textSpeed.setText('Speed: '+str(self.speed))
         self.ignore('mouse3-up')
@@ -547,12 +498,8 @@ class Player(object, DirectObject.DirectObject):
         #self.mouseTask = taskMgr.add(self.mouseUpdateTask, 'mouse-task')
         #self.contrail.loadConfig('../../media/contrail.ptf')
         self.contrail2.softStop()
-        self.zoom = -5-(self.speed/10)
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that controls the event when the airplane hit something
-    #------------------------------------------------------------------------------------------------------    
-    def evtHit(self, entry):
+        self.zoom = -5-(self.speed/10)  
+    def evtHit(self, entry): #Function that controls the event when the airplane hit something
         if entry.getIntoNodePath().getParent().getTag("orign") != self.node.getName():
             
             #if entry.getIntoNodePath().getName() == "projectile":
@@ -570,41 +517,27 @@ class Player(object, DirectObject.DirectObject):
                     #"stop" gravity
                     #self.gravityForce=LinearVectorForce(0,0,0)
                     self.explode()    
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function for freelook on
-    #------------------------------------------------------------------------------------------------------
-    def evtFreeLookON(self):
+    def evtFreeLookON(self): #Function for freelook on
         if self.landing == False:
             self.freeLook = True
             self.camRotH = 270
             self.camRotV = 80
-            self.myImage.hide()
-            
-    #------------------------------------------------------------------------------------------------------
-    #Function for freelook off
-    #------------------------------------------------------------------------------------------------------        
-    def evtFreeLookOFF(self):
+            self.myImage.hide()      
+    def evtFreeLookOFF(self): #Function for freelook off
         if self.landing == False:
             self.freeLook = False
             base.camera.setPos(0,-20,2)
             base.camera.lookAt(self.aimNode)
-            self.myImage.show()
-            
-    #------------------------------------------------------------------------------------------------------
-    #Function that delete features of the airplane
-    #------------------------------------------------------------------------------------------------------    
-    def __del__(self):
+            self.myImage.show() 
+    def __del__(self): #Function that delete features of the airplane
         self.ignoreAll()
         self.contrail.cleanup()
         
         #delete stop the sound
-        #-------------------------------------------------------------------------------
         self.Sound.stop()
         self.audio3d.detachSound(self.Sound)
         self.engineSound.stop()
         self.MusicSound.stop()
-        #-------------------------------------------------------------------------------
         
         base.camera.reparentTo(render)
         base.camera.setPos(2000,2000,800)
@@ -616,12 +549,8 @@ class Player(object, DirectObject.DirectObject):
         self.node.removeNode()
         #hide cursor image after death
         self.myImage.hide()
-        messenger.send( 'player-death' )   
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that conrol event that increse speed
-    #------------------------------------------------------------------------------------------------------    
-    def evtSpeedUp(self):
+        messenger.send( 'player-death'     
+    def evtSpeedUp(self): #Function that conrol event that increse speed
         if self.landing:
             return 0 
         self.speed += 5
@@ -633,11 +562,7 @@ class Player(object, DirectObject.DirectObject):
         self.zoom = -5-(self.speed/10)
         #speed text
         #self.textSpeed.setText('Speed: '+str(self.speed))
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that control event that decrease speed
-    #------------------------------------------------------------------------------------------------------
-    def evtSpeedDown(self):
+    def evtSpeedDown(self): #Function that control event that decrease speed
         if self.landing:
             return 0
         #speed text
@@ -649,11 +574,7 @@ class Player(object, DirectObject.DirectObject):
             #self.engineSound.setVolume(0)
             self.engineSound.setPlayRate(0.5)
         self.zoom = -5-(self.speed/10)
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that control open menu event(ESC)
-    #------------------------------------------------------------------------------------------------------
-    def evtMenuOpen(self):
+    def evtMenuOpen(self): #Function that control open menu event(ESC)
         taskMgr.remove(self.mouseTask)
         taskMgr.remove(self.moveTask)
         self.myImage.hide()
@@ -665,11 +586,7 @@ class Player(object, DirectObject.DirectObject):
         #control volume
         self.engineSound.stop()
         self.MusicSound.setVolume(0.5)
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that control close menu event(ESC)
-    #------------------------------------------------------------------------------------------------------
-    def evtMenuClose(self):
+    def evtMenuClose(self): #Function that control close menu event(ESC)
         #self.addEvents()
         props = WindowProperties()
         props.setCursorHidden(1)
@@ -682,24 +599,13 @@ class Player(object, DirectObject.DirectObject):
         #control volume
         self.engineSound.play()
         self.MusicSound.setVolume(1.5)
-
-#------------------------------------------------------------------------------------------------------
-#Class that control messages 
-#------------------------------------------------------------------------------------------------------
-class MessageManager(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------
-    def __init__(self):
+class MessageManager(DirectObject.DirectObject): #Class that control messages 
+    def __init__(self): #Class constructor
         # list of current messages
         self.messages =[]
         # start the erase task
         self.eraseTaskPointer = taskMgr.doMethodLater(1.0, self.__eraseTask, 'erase-task')
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that erase messages
-    #------------------------------------------------------------------------------------------------------
-    def __eraseTask(self, task):
+    def __eraseTask(self, task): #Function that erase messages
         i = 0
         for message in self.messages:
             message[1] -= 1
@@ -708,26 +614,15 @@ class MessageManager(DirectObject.DirectObject):
                 del self.messages[i]
             i +=1
 
-        return task.again    
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that add messages
-    #------------------------------------------------------------------------------------------------------ 
-    def addMessage(self, message, lifetime):
+        return task.again     
+    def addMessage(self, message, lifetime): #Function that add messages
         self.messages.append([ 
                              OnscreenText(text = message, pos = (0, (0.75-len(self.messages)*0.1)), 
                                            scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.5)),
                              lifetime
                               ]) 
-
-#------------------------------------------------------------------------------------------------------
-#Class for main menu
-#------------------------------------------------------------------------------------------------------
-class MainMenu(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------
-    def __init__(self,cond=1):
+class StartMenu(DirectObject.DirectObject): #Class for main menu
+    def __init__(self,cond=1): #Class constructor
         
         self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
         self.frame['frameColor']=(0.8,0.8,0.8,1)
@@ -743,41 +638,51 @@ class MainMenu(DirectObject.DirectObject):
         self.accept('escape', self.showMenu)
         
         self.graphicsSettings = GraphicsSettings()
-        self.credits = Credits()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that show menu
-    #------------------------------------------------------------------------------------------------------    
-    def showMenu(self):
+        self.credits = Credits()  
+    def showMenu(self): #Function that show menu
         self.frame.show()
         # send an event for the player class
-        messenger.send( "menuOpen" )
-
-    #------------------------------------------------------------------------------------------------------
-    #Function that hide menu
-    #------------------------------------------------------------------------------------------------------    
-    def hideMenu(self):
+        messenger.send( "menuOpen" )    
+    def hideMenu(self): #Function that hide menu
         self.frame.hide()
         # send an event for the player class
-        messenger.send( "menuClosed" )
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that show graphic settings
-    #------------------------------------------------------------------------------------------------------    
-    def showGraphicsSettings(self):
-        self.graphicsSettings.show()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that show credits
-    #------------------------------------------------------------------------------------------------------        
-    def showCredits(self):
-        self.credits.show()
+        messenger.send( "menuClosed" )    
+    def showGraphicsSettings(self): #Function that show graphic settings
+        self.graphicsSettings.show()      
+    def showCredits(self): #Function that show credits
+        self.credits
+class MainMenu(DirectObject.DirectObject):
+    def __init__(self,cond=1): #Class constructor
+        
+        self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
+        self.frame['frameColor']=(0.8,0.8,0.8,1)
 
+        self.headline = DirectLabel(parent=self.frame, text="Main Menu", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
+        
+        self.graphicsButton = DirectButton(parent=self.frame, text="Graphics Settings", command=self.showGraphicsSettings, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
+        self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(0,0,-0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        self.backButton = DirectButton(parent=self.frame, text="Resume", command=self.hideMenu, pos=(0,0,-0.3), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
+        
+        self.hideMenu()
+        self.accept('escape', self.showMenu)
+        
+        self.graphicsSettings = GraphicsSettings()
+        self.credits = Credits() 
+    def showMenu(self): #Function that show menu
+        self.frame.show()
+        # send an event for the player class
+        messenger.send( "menuOpen" )  
+    def hideMenu(self): #Function that hide menu
+        self.frame.hide()
+        # send an event for the player class
+        messenger.send( "menuClosed" )  
+    def showGraphicsSettings(self): #Function that show graphic settings
+        self.graphicsSettings.show()       
+    def showCredits(self): #Function that show credits
+        self.credits.show(
 class GameOverMenu(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------
-    def __init__(self,cond=1):
+    def __init__(self,cond=1):#Class constructor
         
         self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
         self.frame['frameColor']=(0.8,0.8,0.8,1)
@@ -789,47 +694,25 @@ class GameOverMenu(DirectObject.DirectObject):
         
         self.acceptOnce('escape', self.hideMenu)
         
-        self.credits = Credits()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that show menu
-    #------------------------------------------------------------------------------------------------------    
-    def showMenu(self):
+        self.credits = Credits()   
+    def showMenu(self): #Function that show menu
         self.frame.show()
         # send an event for the player class
         messenger.send( "menuOpen" )
-
-    #------------------------------------------------------------------------------------------------------
-    #Function that hide menu
-    #------------------------------------------------------------------------------------------------------    
-    def hideMenu(self):
+    def hideMenu(self): #Function that hide menu
         self.frame.hide()
         # send an event for the player class
-        messenger.send( "menuClosed" )
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that show graphic settings
-    #------------------------------------------------------------------------------------------------------    
-    def doRestart(self):
+        messenger.send( "menuClosed" ) 
+    def doRestart(self): #Function that show graphic settings
         self.hideMenu()
         props = WindowProperties()
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        Player()
-    #------------------------------------------------------------------------------------------------------
-    #Function that show credits
-    #------------------------------------------------------------------------------------------------------        
-    def showEndingCredits(self):
+        Player()     
+    def showEndingCredits(self): #Function that show credits
         self.credits.show()
-                
-#------------------------------------------------------------------------------------------------------
-#Class that control game features - main class
-#------------------------------------------------------------------------------------------------------    
-class Game(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------    
-    def __init__(self):
+class Game(DirectObject.DirectObject): #Class that control game features - main class  
+    def __init__(self): #Class constructor
         MainMenu()
         #PStatClient.connect()
         props = WindowProperties()
@@ -855,37 +738,21 @@ class Game(DirectObject.DirectObject):
         self.accept('mouse1',self.evtShoot)
         
         #Add game over sound
-        #-------------------------------------------------------------------------------
         self.gameOverSound = loader.loadSfx("smas44.mp3")
         self.gameOverSound.setVolume(4)
-        self.gameOverSound.setPlayRate(1)
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that controls the player's death
-    #------------------------------------------------------------------------------------------------------    
-    def evtPlayerDeath(self):
+        self.gameOverSound.setPlayRate(1) 
+    def evtPlayerDeath(self): #Function that controls the player's death
         self.msg.addMessage("Game Over", 6)
         #enable cursor after death
         props = WindowProperties()
         props.setCursorHidden(0)
         base.win.requestProperties(props)
         self.gameOverSound.play()
-        GameOverMenu()
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that control the player's shoot
-    #------------------------------------------------------------------------------------------------------        
-    def evtShoot(self):
-        self.shoots +=1   
-
-#------------------------------------------------------------------------------------------------------
-#Class for graphic settings
-#------------------------------------------------------------------------------------------------------    
-class GraphicsSettings(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class contructor
-    #------------------------------------------------------------------------------------------------------    
-    def __init__(self):
+        GameOverMenu()      
+    def evtShoot(self): #Function that control the player's shoot
+        self.shoots +=1      
+class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
+    def __init__(self): #Class contructor
         #available resolutions and multisampling levels
         self.resolutions = ['800 600', '1024 768', '1152 864', '1280 960', '1440 900', '1680 1050']
         self.multisampling = ["0", "2","4","8","16"]
@@ -944,12 +811,8 @@ class GraphicsSettings(DirectObject.DirectObject):
         self.saveButton = DirectButton(parent=self.frame, text="Save", command=self.saveConfig, pos=(-0.4,0,-0.4), scale=0.07)
         self.backButton = DirectButton(parent=self.frame, text="Back", command=self.hide, pos=(0.4,0,-0.4), scale=0.07)
         self.hide()
-        self.loadConfig()
-        
-    #------------------------------------------------------------------------------------------------------
-    #Function that load configuration
-    #------------------------------------------------------------------------------------------------------    
-    def loadConfig(self):
+        self.loadConfig()    
+    def loadConfig(self): #Function that load configuration
         self.resolutionMenu.set( self.resolutions.index( ConfigVariableString('win-size').getValue() ) )
         
         self.aaMenu.set( self.multisampling.index( str(ConfigVariableInt('multisamples').getValue()) ) )
@@ -967,12 +830,8 @@ class GraphicsSettings(DirectObject.DirectObject):
             self.fullscreenBox.setIndicatorValue()
         else:
             self.fullscreenBox["indicatorValue"] = False
-            self.fullscreenBox.setIndicatorValue()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that save configuration
-    #------------------------------------------------------------------------------------------------------    
-    def saveConfig(self):
+            self.fullscreenBox.setIndicatorValue()    
+    def saveConfig(self): #Function that save configuration
         cfgFile = open('cfg.prc', 'w')
         cfgFile.write("model-path $MAIN_DIR/media\n")
 
@@ -990,27 +849,12 @@ class GraphicsSettings(DirectObject.DirectObject):
             cfgFile.write("show-frame-rate-meter #f\n")
         
         cfgFile.close()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that display window
-    #------------------------------------------------------------------------------------------------------    
-    def show(self):
-        self.frame.show()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that hide window
-    #------------------------------------------------------------------------------------------------------            
-    def hide(self):
-        self.frame.hide()
-
-#------------------------------------------------------------------------------------------------------
-#Function that show menu
-#------------------------------------------------------------------------------------------------------    
-class Credits(DirectObject.DirectObject):
-    #------------------------------------------------------------------------------------------------------
-    #Class constructor
-    #------------------------------------------------------------------------------------------------------    
-    def __init__(self):
+    def show(self): #Function that display window
+        self.frame.show()         
+    def hide(self): #Function that hide window
+        self.frame.hide()    
+class Credits(DirectObject.DirectObject):  
+    def __init__(self): #Class constructor
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,1), pos=(0,0,0))
         self.headline = DirectLabel(parent=self.frame, text="Credits", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.4))
         
@@ -1023,20 +867,10 @@ class Credits(DirectObject.DirectObject):
                                       text_align=TextNode.ALeft)
         
         self.backButton = DirectButton(parent=self.frame, text="back", command=self.hide, pos=(0,0,-0.4), scale=0.07)
-        self.hide()
-     
-    #------------------------------------------------------------------------------------------------------
-    #Function that display the window
-    #------------------------------------------------------------------------------------------------------       
-    def show(self):
+        self.hide()   
+    def show(self): #Function that display the window
         self.frame.show()
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that hide the window
-    #------------------------------------------------------------------------------------------------------    
-    def hide(self):
+    def hide(self): #Function that hide the window
         self.frame.hide()
-
-#------------------------------------------------------------------------------------------------------
 Game()
 run()

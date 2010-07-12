@@ -130,11 +130,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
             object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
             object.setH(random.randrange(0, 360, 1))
             object.setScale(0.3)
-            #object.setTexture(rustTexture2)
-            
-            
-
-         
+            #object.setTexture(rustTexture2)      
         '''
         --------------------------------------------------------------------------------
         # add main island
@@ -158,8 +154,6 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.island.setShaderAuto()
         ---------------------------------------------------------------------------------
         '''
-        
-        #-------------------------------------------------------------------------------
         #code for add elements in the enviroment and collidion nodes
         self.rocks = NodePath("rocks")
         self.rocks.reparentTo(render)
@@ -213,10 +207,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         pos = base.camera.getPos(render)
         return task.cont
         '''
-#------------------------------------------------------------------------------------------------------
-#Class Player for the airplane
-#------------------------------------------------------------------------------------------------------
-class Player(object, DirectObject.DirectObject):
+class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def __init__(self): #Class constructor
         self.node = 0 #the player main node
         self.modelNode = 0 #the node of the actual model
@@ -263,12 +254,7 @@ class Player(object, DirectObject.DirectObject):
         self.moveTask = taskMgr.add(self.moveUpdateTask, 'move-task')
         self.mouseTask = taskMgr.add(self.mouseUpdateTask, 'mouse-task')
         self.zoomTaskPointer = taskMgr.add(self.zoomTask, 'zoom-task')
-        
-       
-    #------------------------------------------------------------------------------------------------------
-    #Function to load models and set physics
-    #------------------------------------------------------------------------------------------------------   
-    def loadModel(self):
+    def loadModel(self):#Function to load models and set physics
         #node path for player
         self.node = NodePath('player')
         self.node.setPos(1000,1000,200)
@@ -288,9 +274,6 @@ class Player(object, DirectObject.DirectObject):
         self.aimNode = NodePath('aimNode')
         self.aimNode.reparentTo(self.node)
         self.aimNode.setPos(0,15,2)
-        
-        #self.contrail.loadConfig('media/contrail.ptf')
-        #self.contrail.start(self.node,render)
     
         #gravity (aceleration 9.82)
         self.gravityFN=ForceNode('world-forces')
@@ -315,12 +298,8 @@ class Player(object, DirectObject.DirectObject):
         
         #render object with physics
         self.gnodePath.reparentTo(render)
-        self.node.reparentTo(self.gNodePath)
-           
-    #------------------------------------------------------------------------------------------------------
-    #Function that add camera to airplane
-    #------------------------------------------------------------------------------------------------------   
-    def addCamera(self):
+        self.node.reparentTo(self.gNodePath)  
+    def addCamera(self): #Function that add camera to airplane
         base.disableMouse()
         base.camera.reparentTo(self.node)
         base.camera.setPos(0,self.zoom,2)
@@ -366,7 +345,7 @@ class Player(object, DirectObject.DirectObject):
         self.MusicSound.setLoop(True)
         self.MusicSound.play()
         self.MusicSound.setVolume(1.5)
-        self.MusicSound.setPlayRate(0)
+        self.MusicSound.setPlayRate(1)
     def deleteTask(self, task): #Function to delete task
         self.__del__()
         return task.done   
@@ -486,10 +465,6 @@ class Player(object, DirectObject.DirectObject):
         self.contrail2.start(self.node)
         self.zoom = -25
         self.evtFreeLookOFF()
-    
-    #------------------------------------------------------------------------------------------------------
-    
-    #------------------------------------------------------------------------------------------------------
     def evtBoostOff(self): #Function that decrease speed
         self.speed -=200
         #self.textSpeed.setText('Speed: '+str(self.speed))
@@ -501,10 +476,22 @@ class Player(object, DirectObject.DirectObject):
         self.zoom = -5-(self.speed/10)  
     def evtHit(self, entry): #Function that controls the event when the airplane hit something
         if entry.getIntoNodePath().getParent().getTag("orign") != self.node.getName():
-            
-            #if entry.getIntoNodePath().getName() == "projectile":
-                #self.HP -= 1
-                #self.textHP.setText('HP   : '+str(self.HP))
+            if entry.getIntoNodePath().getName() == "EndOfLevel": #Plane entering Finish area
+                    #hide cursor image during death animation
+                    self.myImage.hide()
+                    self.explode()
+                    #disable physics when hit
+                    base.disableParticles()
+                    #control volume
+                    self.engineSound.stop()
+                    self.MusicSound.setVolume(0.5)
+                    #Set Congratulations Message
+                    #!!! PROGRAMAR AQUI !!!
+                    #Set next level
+                    #!!! PROGRAMAR AQUI !!!
+                    Player();
+                    #Set final points
+                    #!!! PROGRAMAR AQUI !!!
             if self.HP == 0:
                     #hide cursor image during death animation
                     self.myImage.hide()
@@ -605,6 +592,50 @@ class Player(object, DirectObject.DirectObject):
         #control volume
         self.engineSound.play()
         self.MusicSound.setVolume(1.5)
+class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
+    def __init__(self, start, orign):
+        self.node = NodePath('EndOfLevel')
+        self.node.setTag("orign",orign)
+        self.start = start
+        self.collisionHandler = 0
+        self.particleEffect = 0
+        self.loadModel()
+        self.createCollisions()
+        self.setUpEvents()
+    def loadModel(self): #Function that loads Lixeira
+        self.node.reparentTo(render)
+        self.node.setPos(self.start)
+        self.nodeModel = loader.loadModel('lixeira')
+        self.nodeModel.reparentTo(self.node)
+        self.nodeModel.setScale(30)
+    def createCollisions(self): #Functions that add collisions for the Lixeira
+        self.cNode = CollisionNode('EndOfLevel')
+        self.cNode.addSolid(CollisionSphere(0,0,0,0.2))
+        # there is a list of all bitmasks in game.py
+        self.cNode.setIntoCollideMask(BitMask32(0x10))
+        self.cNode.setFromCollideMask(BitMask32(0x1E))
+        
+        self.cNodePath = self.node.attachNewNode(self.cNode)
+        #self.cNodePath.show()
+        
+        self.collisionHandler = CollisionHandlerEvent()
+        self.collisionHandler.addInPattern('lixeiraHit'+str(id(self)))
+       
+        base.cTrav.addCollider(self.cNodePath, self.collisionHandler)        
+    #def deleteTask(self, task): #Function to delete task
+        #self.__del__()
+        #return task.
+        #self.deleteTask = taskMgr.doMethodLater(1, self.deleteTask, 'delete task') 
+    def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
+        #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
+        if entry:
+            if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
+                if entry.getIntoNodePath().getParent().getTag('targetID') != "":
+                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit') 
+    def setUpEvents(self): #Function that set events that will be accepted
+        self.accept('lixeiraHit'+str(id(self)), self.evtHit)
+    def __del__(self): #Function that delete the Lixeira node
+        self.node.removeNode()
 class MessageManager(DirectObject.DirectObject): #Class that control messages 
     def __init__(self): #Class constructor
         # list of current messages

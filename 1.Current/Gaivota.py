@@ -90,6 +90,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
             rustTexture = loader.loadTexture("rust1.jpg")
             rustTexture2 = loader.loadTexture("rust2.jpg")
             
+            '''
             object = loader.loadModel("cadeira")
             object.reparentTo(self.rocks)
             object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
@@ -130,7 +131,8 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
             object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
             object.setH(random.randrange(0, 360, 1))
             object.setScale(0.3)
-            #object.setTexture(rustTexture2)      
+            #object.setTexture(rustTexture2)
+            '''      
         '''
         --------------------------------------------------------------------------------
         # add main island
@@ -207,6 +209,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         pos = base.camera.getPos(render)
         return task.cont
         '''
+        Lixeira((550,100,0))
 class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def __init__(self): #Class constructor
         self.node = 0 #the player main node
@@ -278,7 +281,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         #gravity (aceleration 9.82)
         self.gravityFN=ForceNode('world-forces')
         self.gravityFNP=render.attachNewNode(self.gravityFN)
-        self.gravityForce=LinearVectorForce(0,0,-9.82/4) 
+        self.gravityForce=LinearVectorForce(0,0,-9.82/8) 
         self.gravityFN.addForce(self.gravityForce)
         
         #add gravity to engine
@@ -593,10 +596,12 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.engineSound.play()
         self.MusicSound.setVolume(1.5)
 class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
-    def __init__(self, start, orign):
+    #def __init__(self, start, orign):
+    def __init__(self, start):
         self.node = NodePath('EndOfLevel')
-        self.node.setTag("orign",orign)
+        #self.node.setTag("orign",orign)
         self.start = start
+        #self.start = (1000,1000,200)
         self.collisionHandler = 0
         self.particleEffect = 0
         self.loadModel()
@@ -607,13 +612,15 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.node.setPos(self.start)
         self.nodeModel = loader.loadModel('lixeira')
         self.nodeModel.reparentTo(self.node)
-        self.nodeModel.setScale(30)
+        self.nodeModel.setScale(8)
+        lixeiraTexture = loader.loadTexture("grade.jpg")
+        self.nodeModel.setTexture(lixeiraTexture)
     def createCollisions(self): #Functions that add collisions for the Lixeira
         self.cNode = CollisionNode('EndOfLevel')
         self.cNode.addSolid(CollisionSphere(0,0,0,0.2))
         # there is a list of all bitmasks in game.py
-        self.cNode.setIntoCollideMask(BitMask32(0x10))
-        self.cNode.setFromCollideMask(BitMask32(0x1E))
+        self.cNode.setIntoCollideMask(BitMask32.allOn())
+        self.cNode.setFromCollideMask(BitMask32.allOn())
         
         self.cNodePath = self.node.attachNewNode(self.cNode)
         #self.cNodePath.show()
@@ -631,7 +638,8 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         if entry:
             if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
                 if entry.getIntoNodePath().getParent().getTag('targetID') != "":
-                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit') 
+                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')
+    
     def setUpEvents(self): #Function that set events that will be accepted
         self.accept('lixeiraHit'+str(id(self)), self.evtHit)
     def __del__(self): #Function that delete the Lixeira node

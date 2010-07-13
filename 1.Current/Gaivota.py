@@ -911,7 +911,7 @@ class Credits(DirectObject.DirectObject):
         
         self.Text = DirectLabel(
                                       parent=self.frame, 
-                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.0542 (Pre-Alpha)\n\nBased on Akuryou's Flight game", 
+                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.057 (Pre-Alpha)\n\nBased on Akuryou's Flight game", 
                                       scale=0.04, 
                                       frameColor=(0,0,0,0), 
                                       pos=(-0.48,0,0.35),

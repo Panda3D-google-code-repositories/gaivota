@@ -69,6 +69,13 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         bumbTexture = loader.loadTexture("240-normal.jpg")
         bumbTexture.setMinfilter(Texture.FTLinearMipmapLinear)
         
+        #incluir lixeira
+        Lixeira((550,100,0))
+        
+        #incluir duto de ar
+        dutoAr((700,1000,0))
+        
+        
         # create a main NodePath for all rocks, so we can use flatten, to speed things up
         self.rocks = NodePath("rocks")
         self.rocks.reparentTo(render)
@@ -77,91 +84,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.rocks.setTexture(normalMapts, bumbTexture)
         self.rocks.setMaterial(myMaterial)
         
-        # add rocks between min and max range (so we don't spawn rocks to close to the main island) 
-        maxRangeXY = 800
-        minRangeXY = 170
-        for i in range(0,10):
-            xrand = 0
-            yrand = 0
-            while  ((-minRangeXY < xrand < minRangeXY ) or (-minRangeXY < yrand < minRangeXY )):
-                xrand = random.randrange(-maxRangeXY, maxRangeXY, 25)
-                yrand = random.randrange(-maxRangeXY, maxRangeXY, 25)
-            
-            rustTexture = loader.loadTexture("rust1.jpg")
-            rustTexture2 = loader.loadTexture("rust2.jpg")
-            
-            '''
-            object = loader.loadModel("cadeira")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(1)
-            object.setTexture(rustTexture)
-            
-            object = loader.loadModel("ventilador2")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(1)
-            object.setTexture(rustTexture2)
-            
-            object = loader.loadModel("duto1")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(1)
-            object.setTexture(rustTexture2)
-            
-            object = loader.loadModel("duto2")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(1)
-            #object.setTexture(rustTexture2)
-            
-            object = loader.loadModel("cafe1")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(5)
-            #object.setTexture(rustTexture2)
-            
-            object = loader.loadModel("cafe2")
-            object.reparentTo(self.rocks)
-            object.setPos(xrand,yrand,random.randrange(-200, 200, 25))
-            object.setH(random.randrange(0, 360, 1))
-            object.setScale(0.3)
-            #object.setTexture(rustTexture2)
-            '''      
-        '''
-        --------------------------------------------------------------------------------
-        # add main island
-        bumbTexture = loader.loadTexture("blobbyDOT3.png")
-        bumbTexture.setMinfilter(Texture.FTLinearMipmapLinear)
-        self.island = loader.loadModel("isle")
-        self.island.reparentTo(render)
-        self.island.setMaterial(myMaterial)
-        self.island.setTexture(normalMapts, bumbTexture)
         
-        self.islandc = loader.loadModel("islec")
-        self.islandc.reparentTo(self.island)
-        # there is a list of all bitmasks in game.py
-        self.islandc.setCollideMask(BitMask32(0x8))
-        
-               
-        myMaterial = Material()
-        myMaterial.setShininess(22.0) #Make this material shiny
-        myMaterial.setAmbient(VBase4(1,1,1,1))
-        myMaterial.setSpecular(VBase4(0.2,0.2,0.2,0.2))
-        self.island.setShaderAuto()
-        ---------------------------------------------------------------------------------
-        '''
-        #code for add elements in the enviroment and collidion nodes
-        self.rocks = NodePath("rocks")
-        self.rocks.reparentTo(render)
-        self.rocks.flattenStrong()
-        self.rocks.setShaderAuto()
-        self.rocks.setTexture(normalMapts, bumbTexture)
         #-------------------------------------------------------------------------------        
         self.ball = loader.loadModel("sala2")
         grassTexture = loader.loadTexture("grass1.jpg")
@@ -178,38 +101,6 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.ballCol.flattenLight()
         #-------------------------------------------------------------------------------
         
-        '''
-        #---------------------------------------------------------------------------------
-        # Load the environment model
-        self.environ = loader.loadModel("cubo")
-        # Reparent the model to render.
-        self.environ.reparentTo(render)
-        
-        # Apply scale and position transforms on the model.
-        self.environ.setScale(1000, 1000, 1000)
-        #self.environ.setPos(-80,-80,-80)
-        #self.environ.setCollideMask(BitMask32(0x8))
-        
-        self.environ.setShaderAuto()
-
-        grassTexture = loader.loadTexture("grass1.jpg")
-        self.environ.setTexture(grassTexture)
-        self.environ.setShaderAuto()
-        
-        # collision node for the terrain
-        self.terrainCol = self.environ.copyTo(render)
-        self.terrainCol.hide()
-        # this flag will let the collision system treat collision test for objects colliding into the terrain
-        # since the terrain has no collisionNode attached, it is necessary to set the mask
-        self.terrainCol.setCollideMask(BitMask32.allOn())
-        self.terrainCol.flattenLight()
-
-        #Function to update sky
-        def updateSky(self, task):
-        pos = base.camera.getPos(render)
-        return task.cont
-        '''
-        Lixeira((550,100,0))
 class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def __init__(self): #Class constructor
         self.node = 0 #the player main node
@@ -233,6 +124,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.gNode = 0 #node of gravity
         self.gNodePath = 0#node path to actorNode
         #self
+        
+        
+        
         
         #add text speed
         #---------------------------------------------------------------------------------
@@ -319,23 +213,19 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def addCollisions(self): #Functions that add collisions for the airplane
         self.cNode = CollisionNode('player')
         self.cNode.addSolid(CollisionSphere(0,0,0,2.3))
-        self.cNode.setFromCollideMask(BitMask32(0x1A))
-        self.cNode.setIntoCollideMask(BitMask32(0x4))
-        
         self.cNodePath = self.node.attachNewNode(self.cNode)
         #self.cNodePath.show()
         self.collisionHandler.addInPattern('hit')
         base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
         
-        # landing segment:
-        self.landingCNodeSegment = CollisionNode('playerRay')
-        self.landingCNodeSegment.addSolid(CollisionSegment(0, 0, 0, 0, 0, -20))
-        self.landingCNodeSegment.setIntoCollideMask(BitMask32.allOff())
-        self.landingCNodeSegment.setFromCollideMask(BitMask32(0x8))
+        #raio de colisao:
+        self.cNode = CollisionNode('playerDuto')
+        self.cNode.addSolid(CollisionRay(0,0,-1 , 0,0,-1))
+        self.cNodePath = self.node.attachNewNode(self.cNode)
+        self.cNodePath.show()
+        self.collisionHandler.addInPattern('test')
+        #base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
         
-        self.landingCNodeSegmentPath = self.node.attachNewNode(self.landingCNodeSegment)
-        #self.landingCNodeSegmentPath.show()
-        base.cTrav.addCollider(self.landingCNodeSegmentPath, self.collisionHandlerQueue)
     def addSound(self): #Function to add sound to airplane
         self.engineSound = loader.loadSfx("engine.mp3")
         self.engineSound.setLoop(True)
@@ -605,7 +495,7 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.collisionHandler = 0
         self.particleEffect = 0
         self.loadModel()
-        self.createCollisions()
+        #self.createCollisions()
         self.setUpEvents()
     def loadModel(self): #Function that loads Lixeira
         self.node.reparentTo(render)
@@ -615,24 +505,7 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.nodeModel.setScale(8)
         lixeiraTexture = loader.loadTexture("grade.jpg")
         self.nodeModel.setTexture(lixeiraTexture)
-    def createCollisions(self): #Functions that add collisions for the Lixeira
-        self.cNode = CollisionNode('EndOfLevel')
-        self.cNode.addSolid(CollisionSphere(0,0,0,0.2))
-        # there is a list of all bitmasks in game.py
-        self.cNode.setIntoCollideMask(BitMask32.allOn())
-        self.cNode.setFromCollideMask(BitMask32.allOn())
-        
-        self.cNodePath = self.node.attachNewNode(self.cNode)
-        #self.cNodePath.show()
-        
-        self.collisionHandler = CollisionHandlerEvent()
-        self.collisionHandler.addInPattern('lixeiraHit'+str(id(self)))
-       
-        base.cTrav.addCollider(self.cNodePath, self.collisionHandler)        
-    #def deleteTask(self, task): #Function to delete task
-        #self.__del__()
-        #return task.
-        #self.deleteTask = taskMgr.doMethodLater(1, self.deleteTask, 'delete task') 
+    
     def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
         #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
         if entry:
@@ -644,6 +517,47 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.accept('lixeiraHit'+str(id(self)), self.evtHit)
     def __del__(self): #Function that delete the Lixeira node
         self.node.removeNode()
+
+class dutoAr(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
+    #def __init__(self, start, orign):
+    def __init__(self, start):
+        self.node = NodePath('increasePlayerUp')
+        #self.node.setTag("orign",orign)
+        self.start = start
+        #self.start = (1000,1000,200)
+        self.collisionHandler = 0
+        self.particleEffect = 0
+        self.loadModel()
+        self.setUpEvents()
+        self.addCollisions()
+    def loadModel(self): #Function that loads Lixeira
+        self.node.reparentTo(render)
+        self.node.setPos(self.start)
+        self.nodeModel = loader.loadModel('cubo')
+        self.nodeModel.reparentTo(self.node)
+        self.nodeModel.setScale(20)
+        dutoArTexture = loader.loadTexture("textura_roxa.jpg")
+        self.nodeModel.setTexture(dutoArTexture)
+    def addCollisions(self): #Functions that add collisions for the duto
+        self.cNode = CollisionNode('duto')
+        self.cNode.addSolid(CollisionSphere(0,0,0,50))
+        self.cNodePath = self.node.attachNewNode(self.cNode)
+        self.cNodePath.show()
+        #self.collisionHandler.addInPattern('hit')
+        #base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
+        
+    def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
+        #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
+        if entry:
+            if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
+                if entry.getIntoNodePath().getParent().getTag('targetID') != "":
+                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')
+    
+    def setUpEvents(self): #Function that set events that will be accepted
+        self.accept('lixeiraHit'+str(id(self)), self.evtHit)
+    def __del__(self): #Function that delete the Lixeira node
+        self.node.removeNode()
+
 class MessageManager(DirectObject.DirectObject): #Class that control messages 
     def __init__(self): #Class constructor
         # list of current messages

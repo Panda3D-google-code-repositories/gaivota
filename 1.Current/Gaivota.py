@@ -6,7 +6,7 @@ Marco ~ Julho de 2010
 Authors: Filipe Yamamoto, Fabio Castanheira, Miguel Fernandes
 Site: http://code.google.com/p/gaivota/
 Blog: http://gaivotagame.blogspot.com
-Version: 0.057 (Pre-Alpha)
+Version: 0.06 (Alpha)
 
 Check out our site to see project details
 '''
@@ -75,7 +75,6 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         #incluir duto de ar
         dutoAr((700,1000,0))
         
-        
         # create a main NodePath for all rocks, so we can use flatten, to speed things up
         self.rocks = NodePath("rocks")
         self.rocks.reparentTo(render)
@@ -83,23 +82,20 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.rocks.setShaderAuto()
         self.rocks.setTexture(normalMapts, bumbTexture)
         self.rocks.setMaterial(myMaterial)
-        
-        
-        #-------------------------------------------------------------------------------        
-        self.ball = loader.loadModel("sala2")
+              
+        self.room = loader.loadModel("sala2")
         grassTexture = loader.loadTexture("grass1.jpg")
-        self.ball.setTexture(grassTexture)
-        self.ball.setShaderAuto()
-        self.ball.reparentTo(self.rocks)
-        self.ball.setScale(4,4,4)
-        self.ball.setPos(0,0,0)
-        self.ballCol = self.ball.copyTo(render)
-        self.ballCol.hide()
+        self.room.setTexture(grassTexture)
+        self.room.setShaderAuto()
+        self.room.reparentTo(self.rocks)
+        self.room.setScale(4,4,4)
+        self.room.setPos(0,0,0)
+        self.roomCol = self.room.copyTo(render)
+        self.roomCol.hide()
         # this flag will let the collision system treat collision test for objects colliding into the terrain
         # since the terrain has no collisionNode attached, it is necessary to set the mask
-        self.ballCol.setCollideMask(BitMask32.allOn())
-        self.ballCol.flattenLight()
-        #-------------------------------------------------------------------------------
+        self.roomCol.setCollideMask(BitMask32.allOn())
+        self.roomCol.flattenLight()
         
 class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def __init__(self): #Class constructor
@@ -271,15 +267,11 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             self.roll = -25 * self.speed/self.speedMax
         if self.roll > 25 * self.speed/self.speedMax:
             self.roll = 25 * self.speed/self.speedMax
-        
-        
-        
+            
         self.node.setR(self.roll*3)
         base.camera.setZ(2-self.camHeight*0.5* self.speed/self.speedMax)
         base.camera.lookAt(self.aimNode)
         base.camera.setR(-self.roll*2)
-        #base.camera.setY(-30+self.speed/10)
-        #base.camera.setX(self.roll*0.5)
         
         # freelook mode:
         if self.freeLook:
@@ -354,7 +346,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             base.camera.setY( base.camera.getY()+ (self.zoom- base.camera.getY())*globalClock.getDt()*2 )
         return task.cont
     def evtBoostOn(self): #Function that increase speed 
-        #taskMgr.remove(self.mouseTask)
         self.ignore( "wheel_up")
         self.ignore( "wheel_down")
         self.ignore('f')
@@ -368,11 +359,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.evtFreeLookOFF()
     def evtBoostOff(self): #Function that decrease speed
         self.speed -=200
-        #self.textSpeed.setText('Speed: '+str(self.speed))
         self.ignore('mouse3-up')
         self.addEvents()
-        #self.mouseTask = taskMgr.add(self.mouseUpdateTask, 'mouse-task')
-        #self.contrail.loadConfig('../../media/contrail.ptf')
         self.contrail2.softStop()
         self.zoom = -5-(self.speed/10)  
     def evtHit(self, entry): #Function that controls the event when the airplane hit something
@@ -458,13 +446,10 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def evtSpeedDown(self): #Function that control event that decrease speed
         if self.landing:
             return 0
-        #speed text
-        #self.textSpeed.setText('Speed: '+str(self.speed))
         self.speed -= 5
         self.engineSound.setPlayRate(self.engineSound.getPlayRate()-0.05)
         if self.speed < 0:
             self.speed = 0
-            #self.engineSound.setVolume(0)
             self.engineSound.setPlayRate(0.5)
         self.zoom = -5-(self.speed/10)
     def evtMenuOpen(self): #Function that control open menu event(ESC)
@@ -498,7 +483,6 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.node = NodePath('EndOfLevel')
        
         self.start = start
-        #self.start = (1000,1000,200)
         self.collisionHandler = 0
         self.particleEffect = 0
         self.loadModel()
@@ -517,8 +501,6 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.collider.setName("EndOfLevel")
         self.collider.setCollideMask(BitMask32.allOn())
     def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
-
-         #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
         if entry:
             if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
                 if entry.getIntoNodePath().getParent().getTag('targetID') != "":
@@ -597,9 +579,6 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.frame2 = DirectFrame(parent=render2d, image="media/TitleScreen.jpg", sortOrder=(-1))
-        #self.frame['frameColor']=(0.8,0.8,0.8,0)
-
-        #self.headline = DirectLabel(parent=self.frame, text="GAIVOTA", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         
         self.startButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0)) 
         self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(1,0,-0.6), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
@@ -607,10 +586,6 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         
         self.showMenu()
         self.credits = Credits()
-        #Carrega Imagem do Inicio (TitleScreen)
-        
-        #b=OnscreenImage(parent=render2d, image="media/TitleScreen.jpg")
-        #base.cam.node().getDisplayRegion(0).setSort(20)  
         
     def showMenu(self): #Function that show menu
         self.frame.show()
@@ -666,11 +641,9 @@ class GameOverMenu(DirectObject.DirectObject):
         self.headline = DirectLabel(parent=self.frame, text="GAME OVER", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         
         self.retryButton = DirectButton(parent=self.frame, text="Retry", command=self.doRestart, pos=(0,0,0.1), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06)) 
-        #self.giveupButton = DirectButton(parent=self.frame, text="Give Up!", command=self.showEndingCredits, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
         self.giveupButton = DirectButton(parent=self.frame, text="Give Up!", command=sys.exit, pos=(0,0,0), text_scale=0.06, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06))
         
         self.acceptOnce('escape', self.hideMenu)
-        
         self.credits = Credits()   
     def showMenu(self): #Function that show menu
         self.frame.show()
@@ -837,7 +810,7 @@ class Credits(DirectObject.DirectObject):
         
         self.Text = DirectLabel(
                                       parent=self.frame, 
-                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.057 (Pre-Alpha)\n\nBased on Akuryou's Flight game", 
+                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.06 (Pre-Alpha)\n\nBased on Akuryou's Flight game", 
                                       scale=0.04, 
                                       frameColor=(0,0,0,0), 
                                       pos=(-0.48,0,0.35),

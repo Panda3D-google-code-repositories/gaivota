@@ -123,17 +123,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.gnodePath = 0 #node to phisics
         self.gNode = 0 #node of gravity
         self.gNodePath = 0#node path to actorNode
-        #self
-        
-        
-        
-        
-        #add text speed
-        #---------------------------------------------------------------------------------
-        #self.textSpeed = OnscreenText(text = 'Speed: '+str(self.speed), pos = (-1.34, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ALeft)
-        #self.textHP = OnscreenText(text = 'Health:    '+str(self.HP), pos = (-1.33, 0.85), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ALeft)
-        #---------------------------------------------------------------------------------
-        
+        self.msg = MessageManager()       
         self.roll = 0
         self.camHeight = 0
         
@@ -227,9 +217,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         
         self.collisionHandler.addInPattern('hit')
         self.cNode.setIntoCollideMask(0);
-        self.cNodeRay.setIntoCollideMask(0);
-
-        
+        self.cNodeRay.setIntoCollideMask(0);      
     def addSound(self): #Function to add sound to airplane
         self.engineSound = loader.loadSfx("engine.mp3")
         self.engineSound.setLoop(True)
@@ -372,8 +360,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.contrail2.softStop()
         self.zoom = -5-(self.speed/10)  
     def evtHit(self, entry): #Function that controls the event when the airplane hit something
- 
-
         print "INTO " + entry.getIntoNodePath().getName()
         print "FROM " + entry.getFromNodePath().getName()
         print "PARENT " + entry.getIntoNodePath().getParent().getName()
@@ -381,45 +367,31 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         if entry.getFromNodePath().getName() == "playerDuto":
             if entry.getIntoNodePath().getName() == "duto": #Plane entering Finish area
                 print "VENTO"
+                self.msg.addMessage("ENTROU NO VENTO", 1)
 
         if entry.getFromNodePath().getName() == self.node.getName():
-
-
+            
             if entry.getIntoNodePath().getParent().getName() == "EndOfLevel": #Plane entering Finish area
-                    #hide cursor image during death animation
-                    self.myImage.hide()
-                    self.explode()
-                    #disable physics when hit
-                    base.disableParticles()
-                    #control volume
-                    self.engineSound.stop()
-                    self.MusicSound.setVolume(0.5)
+                    self.myImage.hide() #hide cursor image during death animation
+                    #self.explode()
+                    base.disableParticles() #disable physics when hit                   
+                    self.engineSound.stop() #control volume
+                    self.MusicSound.setVolume(0.5) #control volume
                     #Set Congratulations Message
                     print "CONGRATULATIONS"
+                    self.msg.addMessage("FINAL DA FASE", 3)
                     #!!! PROGRAMAR AQUI !!!
                     #Set next level
                     #!!! PROGRAMAR AQUI !!!
                     Player();
                     #Set final points
                     #!!! PROGRAMAR AQUI !!!
-            if self.HP == 0:
-                    #hide cursor image during death animation
-                    self.myImage.hide()
-                    self.explode()
-                    #disable physics when hit
-                    base.disableParticles()
-                    #control volume
-                    self.engineSound.stop()
-                    self.MusicSound.setVolume(0.5)
-            else:
-                    #hide cursor image during death animation
-                    self.myImage.hide()
-                    self.explode()
-                    #disable physics when hit
-                    base.disableParticles()
-                    #control volume
-                    self.engineSound.stop()
-                    self.MusicSound.setVolume(0.5)   
+            else:                  
+                    self.myImage.hide() #hide cursor image during death animation
+                    self.explode()                 
+                    base.disableParticles() #disable physics when hit                 
+                    self.engineSound.stop() #control volume
+                    self.MusicSound.setVolume(0.5) #control volume   
                     
     def evtFreeLookON(self): #Function for freelook on
         if self.landing == False:

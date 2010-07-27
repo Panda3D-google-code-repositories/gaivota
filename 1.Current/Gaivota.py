@@ -292,14 +292,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             base.camera.setY( math.sin(math.radians(self.camRotH))*math.sin(math.radians(self.camRotV)) *30 )
             base.camera.setZ( math.cos(math.radians(self.camRotV)) *30 )
             base.camera.lookAt(self.node)
-            
-            
-        return task.cont
-    
-    #------------------------------------------------------------------------------------------------------
-    #Function that update players position
-    #------------------------------------------------------------------------------------------------------
-    def moveUpdateTask(self,task): 
+                   
+        return task.cont    
+    def moveUpdateTask(self,task): #Function that update players position
         # move where the keys set it
         self.node.setPos(self.node,Vec3(0,1.0*globalClock.getDt()*self.speed,0))
         
@@ -386,6 +381,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             if entry.getIntoNodePath().getName() == "duto": #Plane entering Finish area
                 print "VENTO"
                 self.msg.addMessage("ENTROU NO VENTO", 1)
+                self.vento=LinearVectorForce(0,0,100)
+                self.gravityFN.addForce(self.vento)
+                self.gNode.getPhysical(0).addLinearForce(self.vento)
 
         if entry.getFromNodePath().getName() == self.node.getName():
             
@@ -553,7 +551,7 @@ class dutoAr(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.nodeModel.setTexture(dutoArTexture)
     def addCollisions(self): #Functions that add collisions for the duto
         self.cNode = CollisionNode('duto')
-        self.cNode.addSolid(CollisionSphere(0,0,0,50))
+        self.cNode.addSolid(CollisionSphere(0,0,0,32))
         self.cNodePath = self.node.attachNewNode(self.cNode)
         self.cNodePath.show()
         #self.collisionHandler.addInPattern('hit')

@@ -126,6 +126,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.msg = MessageManager()       
         self.roll = 0
         self.camHeight = 0
+        self.startScore = 27072010
+        self.thisScore = OnscreenText(text = 'Score: '+str(self.startScore), pos = (1.34, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
         
         base.win.movePointer(0, base.win.getXSize()/2, base.win.getYSize()/2)
         
@@ -297,8 +299,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def moveUpdateTask(self,task): #Function that update players position
         # move where the keys set it
         self.node.setPos(self.node,Vec3(0,1.0*globalClock.getDt()*self.speed,0))
-        
-        #self.node.setPos(self.node,self.strafe*globalClock.getDt()*self.speed)
+        # update scoring system
+        self.startScore = self.startScore - (50 * globalClock.getDt())
+        self.thisScore.setText('Score: '+str(self.startScore))
         return task.cont  
     def explode(self): #Function that control the explosion of the airplane
         self.ignoreAll()
@@ -452,8 +455,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             #self.engineSound.setVolume(1)
             self.engineSound.setPlayRate(1.5)
         self.zoom = -5-(self.speed/10)
-        #speed text
-        #self.textSpeed.setText('Speed: '+str(self.speed))
     def evtSpeedDown(self): #Function that control event that decrease speed
         if self.landing:
             return 0
@@ -716,7 +717,7 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         #Add game over sound
         self.gameOverSound = loader.loadSfx("smas44.mp3")
         self.gameOverSound.setVolume(4)
-        self.gameOverSound.setPlayRate(1) 
+        self.gameOverSound.setPlayRate(1)                         
     def evtPlayerDeath(self): #Function that controls the player's death
         self.msg.addMessage("Game Over", 6)
         #enable cursor after death

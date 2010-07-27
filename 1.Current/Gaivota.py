@@ -513,7 +513,7 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.collisionHandler = 0
         self.particleEffect = 0
         self.loadModel()
-        #self.createCollisions()
+        self.addCollisions()
         self.setUpEvents()
     def loadModel(self): #Function that loads Lixeira
         self.node.reparentTo(render)
@@ -523,12 +523,10 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.nodeModel.setScale(8)
         lixeiraTexture = loader.loadTexture("grade.jpg")
         self.nodeModel.setTexture(lixeiraTexture)
-
-
+    def addCollisions(self): #Functions that add collisions for the duto
         self.collider = self.nodeModel.find("**/octree-root")
         self.collider.setName("EndOfLevel")
         self.collider.setCollideMask(BitMask32.allOn())
-
     def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
 
          #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):

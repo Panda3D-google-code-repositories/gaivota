@@ -214,17 +214,21 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.cNode = CollisionNode('player')
         self.cNode.addSolid(CollisionSphere(0,0,0,2.3))
         self.cNodePath = self.node.attachNewNode(self.cNode)
-        #self.cNodePath.show()
-        self.collisionHandler.addInPattern('hit')
+        self.cNodePath.show()
+        
         base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
         
         #raio de colisao:
-        self.cNode = CollisionNode('playerDuto')
-        self.cNode.addSolid(CollisionRay(0,0,-1 , 0,0,-1))
-        self.cNodePath = self.node.attachNewNode(self.cNode)
-        self.cNodePath.show()
-        self.collisionHandler.addInPattern('test')
-        #base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
+        self.cNodeRay = CollisionNode('playerDuto')
+        self.cNodeRay.addSolid(CollisionRay(0,0,-1 , 0,0,-1))
+        self.cNodePathRay = self.node.attachNewNode(self.cNodeRay)
+        self.cNodePathRay.show()
+        base.cTrav.addCollider(self.cNodePathRay, self.collisionHandler)
+        
+        self.collisionHandler.addInPattern('hit')
+        self.cNode.setIntoCollideMask(0);
+        self.cNodeRay.setIntoCollideMask(0);
+
         
     def addSound(self): #Function to add sound to airplane
         self.engineSound = loader.loadSfx("engine.mp3")
@@ -368,8 +372,20 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.contrail2.softStop()
         self.zoom = -5-(self.speed/10)  
     def evtHit(self, entry): #Function that controls the event when the airplane hit something
-        if entry.getIntoNodePath().getParent().getTag("orign") != self.node.getName():
-            if entry.getIntoNodePath().getName() == "EndOfLevel": #Plane entering Finish area
+ 
+
+        print "INTO " + entry.getIntoNodePath().getName()
+        print "FROM " + entry.getFromNodePath().getName()
+        print "PARENT " + entry.getIntoNodePath().getParent().getName()
+
+        if entry.getFromNodePath().getName() == "playerDuto":
+            if entry.getIntoNodePath().getName() == "duto": #Plane entering Finish area
+                print "VENTO"
+
+        if entry.getFromNodePath().getName() == self.node.getName():
+
+
+            if entry.getIntoNodePath().getParent().getName() == "EndOfLevel": #Plane entering Finish area
                     #hide cursor image during death animation
                     self.myImage.hide()
                     self.explode()
@@ -379,6 +395,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     self.engineSound.stop()
                     self.MusicSound.setVolume(0.5)
                     #Set Congratulations Message
+                    print "CONGRATULATIONS"
                     #!!! PROGRAMAR AQUI !!!
                     #Set next level
                     #!!! PROGRAMAR AQUI !!!
@@ -402,7 +419,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     base.disableParticles()
                     #control volume
                     self.engineSound.stop()
-                    self.MusicSound.setVolume(0.5)    
+                    self.MusicSound.setVolume(0.5)   
+                    
     def evtFreeLookON(self): #Function for freelook on
         if self.landing == False:
             self.freeLook = True
@@ -489,7 +507,7 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
     #def __init__(self, start, orign):
     def __init__(self, start):
         self.node = NodePath('EndOfLevel')
-        #self.node.setTag("orign",orign)
+       
         self.start = start
         #self.start = (1000,1000,200)
         self.collisionHandler = 0
@@ -505,16 +523,23 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.nodeModel.setScale(8)
         lixeiraTexture = loader.loadTexture("grade.jpg")
         self.nodeModel.setTexture(lixeiraTexture)
-    
+
+
+        self.collider = self.nodeModel.find("**/octree-root")
+        self.collider.setName("EndOfLevel")
+        self.collider.setCollideMask(BitMask32.allOn())
+
     def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
-        #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
+
+         #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
         if entry:
             if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
                 if entry.getIntoNodePath().getParent().getTag('targetID') != "":
                     messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')
-    
+                    
     def setUpEvents(self): #Function that set events that will be accepted
         self.accept('lixeiraHit'+str(id(self)), self.evtHit)
+
     def __del__(self): #Function that delete the Lixeira node
         self.node.removeNode()
 
@@ -584,7 +609,7 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
     def __init__(self,cond=1): #Class constructor
         
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
-        self.frame2 = DirectFrame(parent=render2d, image="media\TitleScreen.jpg", sortOrder=(-1))
+        self.frame2 = DirectFrame(parent=render2d, image="media/TitleScreen.jpg", sortOrder=(-1))
         #self.frame['frameColor']=(0.8,0.8,0.8,0)
 
         #self.headline = DirectLabel(parent=self.frame, text="GAIVOTA", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
@@ -597,7 +622,7 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         self.credits = Credits()
         #Carrega Imagem do Inicio (TitleScreen)
         
-        #b=OnscreenImage(parent=render2d, image="media\TitleScreen.jpg")
+        #b=OnscreenImage(parent=render2d, image="media/TitleScreen.jpg")
         #base.cam.node().getDisplayRegion(0).setSort(20)  
         
     def showMenu(self): #Function that show menu
@@ -798,7 +823,7 @@ class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings
             self.fullscreenBox.setIndicatorValue()    
     def saveConfig(self): #Function that save configuration
         cfgFile = open('cfg.prc', 'w')
-        cfgFile.write("model-path $MAIN_DIR/media\n")
+        cfgFile.write("model-path $MAIN_DIR/media/n")
 
         cfgFile.write("win-size "+self.resolutionMenu.get()+"\n")
         cfgFile.write("multisamples "+self.aaMenu.get()+"\n")

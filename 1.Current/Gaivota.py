@@ -332,7 +332,25 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
         
-        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')    
+        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')
+    def beatLevel(self): #Function that control the explosion of the airplane
+        self.ignoreAll()
+        self.cNode.setIntoCollideMask(BitMask32.allOff())
+        taskMgr.remove(self.moveTask)
+        taskMgr.remove(self.mouseTask)
+        taskMgr.remove(self.zoomTaskPointer)
+        self.moveTask = 0
+        self.mouseTask = 0
+        
+        #add explosion sound
+        self.audio3d = Audio3DManager.Audio3DManager(base.sfxManagerList[0], base.camera)
+        self.audio3d.setDropOffFactor(0.2)
+        self.Sound = self.audio3d.loadSfx('FF7Fanfare.mp3')
+        self.audio3d.detachSound(self.Sound)
+        self.audio3d.attachSoundToObject( self.Sound, self.node )
+        self.Sound.play()
+        
+        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
     def zoomTask(self, task): #Function for zoom
         if base.camera.getY() != self.zoom and self.freeLook == False:
             base.camera.setY( base.camera.getY()+ (self.zoom- base.camera.getY())*globalClock.getDt()*2 )
@@ -373,7 +391,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             
             if entry.getIntoNodePath().getParent().getName() == "EndOfLevel": #Plane entering Finish area
                     self.myImage.hide() #hide cursor image during death animation
-                    #self.explode()
+                    self.beatLevel()
                     base.disableParticles() #disable physics when hit                   
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume
@@ -383,7 +401,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     #!!! PROGRAMAR AQUI !!!
                     #Set next level
                     #!!! PROGRAMAR AQUI !!!
-                    Player();
+                    #Player();
                     #Set final points
                     #!!! PROGRAMAR AQUI !!!
             else:                  

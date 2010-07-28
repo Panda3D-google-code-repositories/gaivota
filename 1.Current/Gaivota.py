@@ -84,8 +84,6 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.rocks.setMaterial(myMaterial)
               
         self.room = loader.loadModel("sala2")
-        grassTexture = loader.loadTexture("grass1.jpg")
-        self.room.setTexture(grassTexture)
         self.room.setShaderAuto()
         self.room.reparentTo(self.rocks)
         self.room.setScale(4,4,4)

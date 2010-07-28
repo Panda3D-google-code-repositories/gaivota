@@ -200,7 +200,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.cNode = CollisionNode('player')
         self.cNode.addSolid(CollisionSphere(0,0,0,2.3))
         self.cNodePath = self.node.attachNewNode(self.cNode)
-        self.cNodePath.show()
         
         base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
         
@@ -208,7 +207,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.cNodeRay = CollisionNode('playerDuto')
         self.cNodeRay.addSolid(CollisionRay(0,0,-1 , 0,0,-1))
         self.cNodePathRay = self.node.attachNewNode(self.cNodeRay)
-        self.cNodePathRay.show()
         base.cTrav.addCollider(self.cNodePathRay, self.collisionHandler)
         
         self.collisionHandler.addInPattern('hit')
@@ -534,7 +532,7 @@ class dutoAr(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.cNode = CollisionNode('duto')
         self.cNode.addSolid(CollisionSphere(0,0,0,32))
         self.cNodePath = self.node.attachNewNode(self.cNode)
-        self.cNodePath.show()
+
         #self.collisionHandler.addInPattern('hit')
         #base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
         

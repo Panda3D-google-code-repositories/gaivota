@@ -33,7 +33,6 @@ loadPrcFile("cfg.prc")
 
 class Environment(DirectObject.DirectObject): #Class environment for construct environment
     def __init__(self): #Class constructor
-        print "Loading (Level)"
         # add light
         dlight = DirectionalLight('my dlight')
         dlight.setColor(VBase4(1, 1, 1, 1))
@@ -120,10 +119,11 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.msg = MessageManager()       
         self.roll = 0
         self.camHeight = 0
-        self.startScore = 27072010
+        self.startScore = 270710
         self.thisScore = OnscreenText(text = 'Score: '+str(self.startScore), pos = (1.34, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
+        self.death = 0
         
-        self.ultimaColisao = "InicioUltimaColisao "
+        self.ultimaColisao = "InicioUltimaColisao"
         self.atualColisao = "InicioAtualColisao"
         
         base.win.movePointer(0, base.win.getXSize()/2, base.win.getYSize()/2)        
@@ -338,7 +338,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
         
-        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
+        messenger.send( 'game-levelwin' )
+        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')
+        #self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
     def zoomTask(self, task): #Function for zoom
         if base.camera.getY() != self.zoom and self.freeLook == False:
             base.camera.setY( base.camera.getY()+ (self.zoom- base.camera.getY())*globalClock.getDt()*2 )
@@ -366,7 +368,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         #print "FROM " + entry.getFromNodePath().getName()
         #print "PARENT " + entry.getIntoNodePath().getParent().getName()
 
-        if entry.getFromNodePath().getName() == "playerDuto":
+        if entry.getFromNodePath().getName() == "playerDuto": #if it's the collision ray
             self.ultimaColisao = self.atualColisao
             self.atualColisao = entry.getIntoNodePath().getName()
             print "Ultima Colisao: "+self.ultimaColisao +" | Atual Colisao: " +self.atualColisao
@@ -379,29 +381,22 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             if self.ultimaColisao == "duto" and self.atualColisao != "duto": #Plane entering wind area
                 print "SAIU DO VENTO"
                 self.msg.addMessage("SAIU DO VENTO", 1)
-                self.vento=LinearVectorForce(0,0,-60)
+                self.vento=LinearVectorForce(0,0,-65)
                 self.gravityFN.addForce(self.vento)
                 self.gNode.getPhysical(0).addLinearForce(self.vento)
 
-        if entry.getFromNodePath().getName() == self.node.getName():
+        if entry.getFromNodePath().getName() == self.node.getName(): #if it's the player itself
             if entry.getIntoNodePath().getParent().getName() == "EndOfLevel": #Plane entering Finish area
                     self.myImage.hide() #hide cursor image during death animation
                     self.beatLevel()
                     base.disableParticles() #disable physics when hit                   
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume
-                    #Set Congratulations Message
-                    print "CONGRATULATIONS"
                     self.msg.addMessage("FINAL DA FASE", 3)
-                    #!!! PROGRAMAR AQUI !!!
-                    #Set next level
-                    #!!! PROGRAMAR AQUI !!!
-                    #Player();
-                    #Set final points
-                    #!!! PROGRAMAR AQUI !!!
             else:                  
                     self.myImage.hide() #hide cursor image during death animation
-                    self.explode()                 
+                    self.explode()
+                    self.death = 1                 
                     base.disableParticles() #disable physics when hit                 
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume   
@@ -437,7 +432,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.node.removeNode()
         #hide cursor image after death
         self.myImage.hide()
-        messenger.send( 'player-death' ) 
+        
+        if self.death == 1:
+            messenger.send( 'player-death' ) 
     def evtSpeedUp(self): #Function that conrol event that increse speed
         if self.landing:
             return 0 
@@ -567,9 +564,9 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.frame2 = DirectFrame(parent=render2d, image="media/TitleScreen.jpg", sortOrder=(-1))
         
-        self.startButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0)) 
-        self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(1,0,-0.6), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
-        self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(1,0,-0.7), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
+        self.startButton = DirectButton(parent=self.frame, text="Start Game", command=self.doStartGame, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0)) 
+        self.creditsButton = DirectButton(parent=self.frame, text="Credits", command=self.showCredits, pos=(1.075,0,-0.6), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
+        self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(1.13,0,-0.7), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         
         self.showMenu()
         self.credits = Credits()    
@@ -642,25 +639,24 @@ class GameOverMenu(DirectObject.DirectObject):
 class Game(DirectObject.DirectObject): #Class that control game features - main class  
     def __init__(self): #Class constructor
         MainMenu()
+        self.showLoadingScreen()
         props = WindowProperties()
         props.setCursorHidden(1)
         base.win.requestProperties(props)
         render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
         base.camLens.setFar(5100)
-        base.camLens.setFov(100)
+        base.camLens.setFov(100)        
 
         base.cTrav = CollisionTraverser('ctrav')
         base.cTrav.setRespectPrevTransform(True)
         base.enableParticles()
         
-        self.environment = Environment()
-        Player()
+        self.loadLevel(1)
+        self.hideLoadingScreen()
         self.msg = MessageManager()
-        self.lvl = 1
-        self.kills = 0
-        self.shoots = 0
         
         self.accept('player-death', self.evtPlayerDeath)
+        self.accept('game-levelwin', self.evtLevelWin)
         
         #Add game over sound
         self.gameOverSound = loader.loadSfx("smas44.mp3")
@@ -673,6 +669,47 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         base.win.requestProperties(props)
         self.gameOverSound.play()
         GameOverMenu()         
+    def evtLevelWin(self): #Function that controls the player's death
+        print "############## LEVEL WIN: Passou de fase ##############"
+        self.LevelWinBGFrame = DirectFrame(parent=render2d, image="media/LevelWinScreen.jpg", sortOrder=(-1))
+        self.LevelWinFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
+        self.LevelWinHeadline = DirectLabel(parent=self.LevelWinFrame, text="PARABENS!", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
+        self.startButton = DirectButton(parent=self.LevelWinFrame, text="Next", command=self.LoadNextLevel, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
+        self.LevelWinIsOpened = 1
+        print "############## LEVEL WIN: Frame ABERTO ##############" 
+        props = WindowProperties() #enable cursor after death
+        props.setCursorHidden(0)
+        base.win.requestProperties(props)       
+    def LoadNextLevel(self): #Function that show menu
+        if self.LevelWinIsOpened == 1:
+            self.LevelWinBGFrame.destroy()
+            self.LevelWinFrame.destroy()
+            self.LevelWinIsOpened = 0
+            print "############## LEVEL WIN: Frame FECHADO ##############"
+            print self.LevelWinIsOpened             
+        print "############## Carrega proxima fase ##############"
+        #Player.deleteTask()
+        #Player.deleteTask = taskMgr.doMethodLater(4, Player.deleteTask, 'delete task')
+        props = WindowProperties() #enable cursor after death
+        props.setCursorHidden(1)
+        base.win.requestProperties(props)
+        Player()
+        #self.showLoadingScreen()
+        self.loadLevel(1)
+        #self.hideLoadingScreen()
+    def showLoadingScreen(self): #Function that controls the player's death
+        print "############## LOADING SCREEN: Fase esta sendo carregada ##############"
+        self.loadingFrame = DirectFrame(parent=render2d, image="media/LoadingScreen.jpg", sortOrder=(-1))        
+        #self.loadingFrame.show()
+    def hideLoadingScreen(self): #Function that controls the player's death
+        print "############## LOADING SCREEN: Fase terminou de ser carregada ##############"        
+        self.loadingFrame.destroy()
+    def loadLevel(self, id): #Function that controls the player's death
+        self.id = id
+        if self.id == 1:
+            print "############## 1.Primeira Fase ##############"
+            self.environment = Environment()
+            Player()
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor
         #available resolutions and multisampling levels

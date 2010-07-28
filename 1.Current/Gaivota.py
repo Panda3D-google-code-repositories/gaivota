@@ -421,7 +421,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.MusicSound.stop()
         
         base.camera.reparentTo(render)
-        base.camera.setPos(2000,2000,800)
+        base.camera.setPos(1000,1000,200)
         base.camera.lookAt(0,0,0)
         if self.moveTask != 0:
             taskMgr.remove(self.moveTask)

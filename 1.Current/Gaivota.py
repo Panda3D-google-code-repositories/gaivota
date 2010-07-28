@@ -123,8 +123,10 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.startScore = 27072010
         self.thisScore = OnscreenText(text = 'Score: '+str(self.startScore), pos = (1.34, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
         
-        base.win.movePointer(0, base.win.getXSize()/2, base.win.getYSize()/2)
+        self.ultimaColisao = "InicioUltimaColisao "
+        self.atualColisao = "InicioAtualColisao"
         
+        base.win.movePointer(0, base.win.getXSize()/2, base.win.getYSize()/2)        
         self.myImage=OnscreenImage(image = 'cursor.png', pos = (0, 0, -0.02), scale=(0.05))
         self.myImage.setTransparency(TransparencyAttrib.MAlpha)
 
@@ -360,20 +362,28 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.contrail2.softStop()
         self.zoom = -5-(self.speed/10)  
     def evtHit(self, entry): #Function that controls the event when the airplane hit something
-        print "INTO " + entry.getIntoNodePath().getName()
-        print "FROM " + entry.getFromNodePath().getName()
-        print "PARENT " + entry.getIntoNodePath().getParent().getName()
+        #print "INTO " + entry.getIntoNodePath().getName()
+        #print "FROM " + entry.getFromNodePath().getName()
+        #print "PARENT " + entry.getIntoNodePath().getParent().getName()
 
         if entry.getFromNodePath().getName() == "playerDuto":
-            if entry.getIntoNodePath().getName() == "duto": #Plane entering Finish area
-                print "VENTO"
+            self.ultimaColisao = self.atualColisao
+            self.atualColisao = entry.getIntoNodePath().getName()
+            print "Ultima Colisao: "+self.ultimaColisao +" | Atual Colisao: " +self.atualColisao
+            if self.atualColisao == "duto": #Plane entering wind area
+                print "ENTROU NO VENTO"
                 self.msg.addMessage("ENTROU NO VENTO", 1)
-                self.vento=LinearVectorForce(0,0,100)
+                self.vento=LinearVectorForce(0,0,50)
+                self.gravityFN.addForce(self.vento)
+                self.gNode.getPhysical(0).addLinearForce(self.vento)
+            if self.ultimaColisao == "duto" and self.atualColisao != "duto": #Plane entering wind area
+                print "SAIU DO VENTO"
+                self.msg.addMessage("SAIU DO VENTO", 1)
+                self.vento=LinearVectorForce(0,0,-60)
                 self.gravityFN.addForce(self.vento)
                 self.gNode.getPhysical(0).addLinearForce(self.vento)
 
         if entry.getFromNodePath().getName() == self.node.getName():
-            
             if entry.getIntoNodePath().getParent().getName() == "EndOfLevel": #Plane entering Finish area
                     self.myImage.hide() #hide cursor image during death animation
                     self.beatLevel()
@@ -395,7 +405,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     base.disableParticles() #disable physics when hit                 
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume   
-                    
     def evtFreeLookON(self): #Function for freelook on
         if self.landing == False:
             self.freeLook = True
@@ -474,10 +483,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.engineSound.play()
         self.MusicSound.setVolume(1.5)
 class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
-    #def __init__(self, start, orign):
     def __init__(self, start):
-        self.node = NodePath('EndOfLevel')
-       
+        self.node = NodePath('EndOfLevel') 
         self.start = start
         self.collisionHandler = 0
         self.particleEffect = 0
@@ -500,21 +507,15 @@ class Lixeira(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         if entry:
             if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
                 if entry.getIntoNodePath().getParent().getTag('targetID') != "":
-                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')
-                    
+                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')                
     def setUpEvents(self): #Function that set events that will be accepted
         self.accept('lixeiraHit'+str(id(self)), self.evtHit)
-
     def __del__(self): #Function that delete the Lixeira node
         self.node.removeNode()
-
 class dutoAr(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
-    #def __init__(self, start, orign):
     def __init__(self, start):
         self.node = NodePath('increasePlayerUp')
-        #self.node.setTag("orign",orign)
         self.start = start
-        #self.start = (1000,1000,200)
         self.collisionHandler = 0
         self.particleEffect = 0
         self.loadModel()
@@ -532,28 +533,20 @@ class dutoAr(DirectObject.DirectObject):#Class Lixeira for End of Level trigger
         self.cNode = CollisionNode('duto')
         self.cNode.addSolid(CollisionSphere(0,0,0,32))
         self.cNodePath = self.node.attachNewNode(self.cNode)
-
-        #self.collisionHandler.addInPattern('hit')
-        #base.cTrav.addCollider(self.cNodePath, self.collisionHandler)
-        
     def evtHit(self, entry): #Function that controls the event when the Lixeira hit something
         #if entry.getFromNodePath() == self.cNodePath and entry.getIntoNodePath().getName() != self.node.getTag("orign"):
         if entry:
             if entry.getIntoNodePath().getParent().getName() != self.node.getTag("orign"):
                 if entry.getIntoNodePath().getParent().getTag('targetID') != "":
-                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')
-    
+                    messenger.send( entry.getIntoNodePath().getParent().getTag('targetID')+'-evtGotHit')   
     def setUpEvents(self): #Function that set events that will be accepted
         self.accept('lixeiraHit'+str(id(self)), self.evtHit)
     def __del__(self): #Function that delete the Lixeira node
         self.node.removeNode()
-
 class MessageManager(DirectObject.DirectObject): #Class that control messages 
     def __init__(self): #Class constructor
-        # list of current messages
-        self.messages =[]
-        # start the erase task
-        self.eraseTaskPointer = taskMgr.doMethodLater(1.0, self.__eraseTask, 'erase-task')
+        self.messages =[]  # list of current messages
+        self.eraseTaskPointer = taskMgr.doMethodLater(1.0, self.__eraseTask, 'erase-task') # start the erase task
     def __eraseTask(self, task): #Function that erase messages
         i = 0
         for message in self.messages:
@@ -562,7 +555,6 @@ class MessageManager(DirectObject.DirectObject): #Class that control messages
                 message[0].destroy()
                 del self.messages[i]
             i +=1
-
         return task.again     
     def addMessage(self, message, lifetime): #Function that add messages
         self.messages.append([ 
@@ -572,7 +564,6 @@ class MessageManager(DirectObject.DirectObject): #Class that control messages
                               ]) 
 class StartMenu(DirectObject.DirectObject): #Class for main menu
     def __init__(self,cond=1): #Class constructor
-        
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.frame2 = DirectFrame(parent=render2d, image="media/TitleScreen.jpg", sortOrder=(-1))
         
@@ -581,18 +572,15 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         self.quitButton = DirectButton(parent=self.frame, text="Quit", command=sys.exit, pos=(1,0,-0.7), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ARight, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         
         self.showMenu()
-        self.credits = Credits()
-        
+        self.credits = Credits()    
     def showMenu(self): #Function that show menu
         self.frame.show()
         self.frame2.show()
-        # send an event for the player class
-        messenger.send( "startMenuOpen" )    
+        messenger.send( "startMenuOpen" ) # send an event for the player class   
     def hideMenu(self): #Function that hide menu
         self.frame.destroy()
-        self.frame2.destroy()
-        # send an event for the player class
-        messenger.send( "startMenuClosed" )    
+        self.frame2.destroy()     
+        messenger.send( "startMenuClosed" ) # send an event for the player class   
     def doStartGame(self): #Function that show graphic settings
         self.hideMenu()
         Game()     
@@ -600,7 +588,6 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         self.credits.show()
 class MainMenu(DirectObject.DirectObject):
     def __init__(self,cond=1): #Class constructor
-        
         self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
         self.frame['frameColor']=(0.8,0.8,0.8,1)
 
@@ -617,20 +604,17 @@ class MainMenu(DirectObject.DirectObject):
         self.graphicsSettings = GraphicsSettings()
         self.credits = Credits() 
     def showMenu(self): #Function that show menu
-        self.frame.show()
-        # send an event for the player class
-        messenger.send( "menuOpen" )  
+        self.frame.show()        
+        messenger.send( "menuOpen" ) # send an event for the player class 
     def hideMenu(self): #Function that hide menu
         self.frame.hide()
-        # send an event for the player class
-        messenger.send( "menuClosed" )  
+        messenger.send( "menuClosed" )  # send an event for the player class
     def showGraphicsSettings(self): #Function that show graphic settings
         self.graphicsSettings.show()       
     def showCredits(self): #Function that show credits
         self.credits.show()
 class GameOverMenu(DirectObject.DirectObject):
-    def __init__(self,cond=1):#Class constructor
-        
+    def __init__(self,cond=1):#Class constructor       
         self.frame = DirectFrame(frameSize=(-0.3, 0.3, -0.4, 0.4))
         self.frame['frameColor']=(0.8,0.8,0.8,1)
 
@@ -643,12 +627,10 @@ class GameOverMenu(DirectObject.DirectObject):
         self.credits = Credits()   
     def showMenu(self): #Function that show menu
         self.frame.show()
-        # send an event for the player class
-        messenger.send( "menuOpen" )
+        messenger.send( "menuOpen" )# send an event for the player class
     def hideMenu(self): #Function that hide menu
         self.frame.hide()
-        # send an event for the player class
-        messenger.send( "menuClosed" ) 
+        messenger.send( "menuClosed" ) # send an event for the player class
     def doRestart(self): #Function that show graphic settings
         self.hideMenu()
         props = WindowProperties()
@@ -660,12 +642,10 @@ class GameOverMenu(DirectObject.DirectObject):
 class Game(DirectObject.DirectObject): #Class that control game features - main class  
     def __init__(self): #Class constructor
         MainMenu()
-        #PStatClient.connect()
         props = WindowProperties()
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        #anti aliasing
-        render.setAntialias(AntialiasAttrib.MAuto)
+        render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
         base.camLens.setFar(5100)
         base.camLens.setFov(100)
 
@@ -681,7 +661,6 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.shoots = 0
         
         self.accept('player-death', self.evtPlayerDeath)
-        self.accept('mouse1',self.evtShoot)
         
         #Add game over sound
         self.gameOverSound = loader.loadSfx("smas44.mp3")
@@ -689,14 +668,11 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.gameOverSound.setPlayRate(1)                         
     def evtPlayerDeath(self): #Function that controls the player's death
         self.msg.addMessage("Game Over", 6)
-        #enable cursor after death
-        props = WindowProperties()
+        props = WindowProperties() #enable cursor after death
         props.setCursorHidden(0)
         base.win.requestProperties(props)
         self.gameOverSound.play()
-        GameOverMenu()      
-    def evtShoot(self): #Function that control the player's shoot
-        self.shoots +=1      
+        GameOverMenu()         
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor
         #available resolutions and multisampling levels
@@ -705,7 +681,6 @@ class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings
         
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,1), pos=(0,0,0))
         self.headline = DirectLabel(parent=self.frame, text="Graphics Settings", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.4))
-        
         
         self.resolutionText = DirectLabel(
                                           parent=self.frame, 
@@ -759,8 +734,7 @@ class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings
         self.hide()
         self.loadConfig()    
     def loadConfig(self): #Function that load configuration
-        self.resolutionMenu.set( self.resolutions.index( ConfigVariableString('win-size').getValue() ) )
-        
+        self.resolutionMenu.set( self.resolutions.index( ConfigVariableString('win-size').getValue() ) )        
         self.aaMenu.set( self.multisampling.index( str(ConfigVariableInt('multisamples').getValue()) ) )
         
         if ConfigVariableString('show-frame-rate-meter').getValue() == "#t":
@@ -769,8 +743,7 @@ class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings
         else:
             self.fpsBox["indicatorValue"] = False
             self.fpsBox.setIndicatorValue()
-        
-            
+                   
         if ConfigVariableBool('fullscreen').getValue() == True:
             self.fullscreenBox["indicatorValue"] = True
             self.fullscreenBox.setIndicatorValue()

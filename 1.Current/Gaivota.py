@@ -73,6 +73,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         
         #incluir duto de ar
         dutoAr((700,1000,0))
+        dutoAr((1000,700,0))
         
         # create a main NodePath for all rocks, so we can use flatten, to speed things up
         self.rocks = NodePath("rocks")
@@ -141,7 +142,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
     def loadModel(self):#Function to load models and set physics
         #node path for player
         self.node = NodePath('player')
-        self.node.setPos(1000,1000,200)
+        self.node.setPos(1000,500,200)
         self.node.reparentTo(render)
         self.node.lookAt(0,0,200)
         

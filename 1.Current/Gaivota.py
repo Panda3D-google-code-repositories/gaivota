@@ -839,5 +839,41 @@ class Credits(DirectObject.DirectObject):
         self.frame.show()
     def hide(self): #Function that hide the window
         self.frame.hide()
-StartMenu()
+class IntroMovie(DirectObject.DirectObject):  
+    def __init__(self): #Class constructor        
+        MEDIAFILE="media/IntroMovie54.avi"
+        #base.disableMouse()
+        base.setBackgroundColor(0,0,0)
+
+        # implements synchronizeTo.
+        self.tex = MovieTexture("introducao")
+        assert self.tex.read(MEDIAFILE), "Failed to load video!"
+    
+        # Set up a fullscreen card to set the video texture on.
+        self.cm = CardMaker("FullscreenCard");
+        self.cm.setFrameFullscreenQuad()
+        self.cm.setUvRange(self.tex)
+        self.card = NodePath(self.cm.generate())
+        self.card.reparentTo(render2d)
+        self.card.setTexture(self.tex)
+        self.card.setTexScale(TextureStage.getDefault(), self.tex.getTexScale())
+        self.sound=loader.loadSfx(MEDIAFILE)
+        # Synchronize the video to the sound.
+        self.tex.synchronizeTo(self.sound)
+        Sequence(
+               Func(self.playpause),
+               Wait(6),
+               Func(self.loadNextModule)
+               ).start() 
+    def playpause(self):
+        if (self.sound.status() == AudioSound.PLAYING):
+            t = self.sound.getTime()
+            self.sound.stop()
+            self.sound.setTime(t)
+        else:
+            self.sound.play()
+    def loadNextModule(self):
+        StartMenu()
+        self.card.removeNode()
+IntroMovie()
 run()

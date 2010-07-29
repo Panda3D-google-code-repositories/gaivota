@@ -374,13 +374,13 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
             print "Ultima Colisao: "+self.ultimaColisao +" | Atual Colisao: " +self.atualColisao
             if self.atualColisao == "duto": #Plane entering wind area
                 print "ENTROU NO VENTO"
-                self.msg.addMessage("ENTROU NO VENTO", 1)
+                #self.msg.addMessage("ENTROU NO VENTO", 1) #DEBUG
                 self.vento=LinearVectorForce(0,0,50)
                 self.gravityFN.addForce(self.vento)
                 self.gNode.getPhysical(0).addLinearForce(self.vento)
             if self.ultimaColisao == "duto" and self.atualColisao != "duto": #Plane entering wind area
                 print "SAIU DO VENTO"
-                self.msg.addMessage("SAIU DO VENTO", 1)
+                #self.msg.addMessage("SAIU DO VENTO", 1) #DEBUG
                 self.vento=LinearVectorForce(0,0,-65)
                 self.gravityFN.addForce(self.vento)
                 self.gNode.getPhysical(0).addLinearForce(self.vento)
@@ -392,7 +392,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     base.disableParticles() #disable physics when hit                   
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume
-                    self.msg.addMessage("FINAL DA FASE", 3)
+                    #self.msg.addMessage("FINAL DA FASE", 3) #DEBUG
+                    print "FINAL DA FASE"
             else:                  
                     self.myImage.hide() #hide cursor image during death animation
                     self.explode()
@@ -648,7 +649,7 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
             self.startScore = 270710
             self.actualScore = self.startScore
             MainMenu()
-            self.showLoadingScreen()
+            
             props = WindowProperties()
             props.setCursorHidden(1)
             base.win.requestProperties(props)
@@ -660,7 +661,6 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
             
             base.enableParticles()
             self.loadLevel(1)
-            self.hideLoadingScreen()
             self.msg = MessageManager()
             
             self.accept('player-death', self.evtPlayerDeath)
@@ -699,15 +699,12 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         props = WindowProperties() #enable cursor after death
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        #Player()
-        #self.showLoadingScreen()
         self.loadLevel(1)
-        #self.hideLoadingScreen()
     def showLoadingScreen(self): #Function that controls the player's death
         print "############## LOADING SCREEN: Fase esta sendo carregada ##############"
         self.loadingBGFrame = DirectFrame(parent=render2d, image="media/LoadingScreen.jpg", sortOrder=(-1))
         self.loadingFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
-        self.loadingHeadline = DirectLabel(parent=self.loadingFrame, text="Loading...", scale=0.085, frameColor=(0,0,0,0), pos=(01,0,-0.5))        
+        self.loadingHeadline = DirectLabel(parent=self.loadingFrame, text="Loading...", scale=0.085, frameColor=(0,0,0,0), pos=(01,0,-0.5))
         #self.loadingFrame.show()
     def hideLoadingScreen(self): #Function that controls the player's death
         print "############## LOADING SCREEN: Fase terminou de ser carregada ##############"        
@@ -715,12 +712,14 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.loadingBGFrame.destroy()
     def loadLevel(self, id): #Function that controls the player's death
         self.id = id
+        self.showLoadingScreen()
         if self.id == 1:
             print "############## 1.Primeira Fase ##############"
             if self.firstRun == 1:
                 self.environment = Environment()
                 self.firstRun = 0
             Player(self.actualScore)
+            self.hideLoadingScreen()
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor
         #available resolutions and multisampling levels
@@ -825,7 +824,7 @@ class Credits(DirectObject.DirectObject):
         self.frame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,1), pos=(0,0,0))
         self.headline = DirectLabel(parent=self.frame, text="Credits", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.4))
         
-        self.Text = DirectLabel(
+        self.Text = DirectFrame(
                                       parent=self.frame, 
                                       text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.07 (Alpha)\n\nBased on Akuryou's Flight game", 
                                       scale=0.04, 

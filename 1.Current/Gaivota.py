@@ -31,6 +31,11 @@ import sys
 
 loadPrcFile("cfg.prc")
 
+#Global Variables
+startScore = 270710
+firstRun = 1
+actualScore = startScore
+
 class Environment(DirectObject.DirectObject): #Class environment for construct environment
     def __init__(self): #Class constructor
         # add light
@@ -95,7 +100,7 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         self.roomCol.setCollideMask(BitMask32.allOn())
         self.roomCol.flattenLight()       
 class Player(object, DirectObject.DirectObject): #Class Player for the airplane
-    def __init__(self, score): #Class constructor
+    def __init__(self): #Class constructor
         self.node = 0 #the player main node
         self.modelNode = 0 #the node of the actual model
         self.cNode = 0 #the player collision node attached to node
@@ -106,9 +111,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.contrail2.setTransparency(TransparencyAttrib.MDual)
         self.landing = False
         self.freeLook = False
-        self.speed = 50
+        self.speed = 70
         self.speedMax = 100
-        self.agility = 3
+        self.agility = 5
         self.HP = 10
         self.collisionHandler = CollisionHandlerEvent() # the collision handlers
         self.collisionHandlerQueue = CollisionHandlerQueue()
@@ -119,8 +124,10 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.msg = MessageManager()       
         self.roll = 0
         self.camHeight = 0
-        self.actualScore = score
-        self.thisScore = OnscreenText(text = 'Score: '+str(self.actualScore), pos = (1.32, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
+        global actualScore
+        global firstRun
+        firstRun = 0
+        self.thisScore = OnscreenText(text = 'Score: '+str(actualScore), pos = (1.32, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
         self.death = 0
         
         self.ultimaColisao = "InicioUltimaColisao"
@@ -290,8 +297,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         # move where the keys set it
         self.node.setPos(self.node,Vec3(0,1.0*globalClock.getDt()*self.speed,0))
         # update scoring system
-        self.actualScore = self.actualScore - int((100 * globalClock.getDt()))
-        self.thisScore.setText('Score: '+str(self.actualScore))
+        global actualScore
+        actualScore = actualScore - int((100 * globalClock.getDt()))
+        self.thisScore.setText('Score: '+str(actualScore))
         return task.cont  
     def explode(self): #Function that control the explosion of the airplane
         self.ignoreAll()
@@ -339,7 +347,6 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
         
-        Game(0, self.actualScore)
         messenger.send( 'game-levelwin' )
         self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
     def zoomTask(self, task): #Function for zoom
@@ -582,7 +589,7 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         messenger.send( "startMenuClosed" ) # send an event for the player class   
     def doStartGame(self): #Function that show graphic settings
         self.hideMenu()
-        Game(1,0)     
+        Game()     
     def showCredits(self): #Function that show credits
         self.credits.show()
 class MainMenu(DirectObject.DirectObject):
@@ -635,39 +642,30 @@ class GameOverMenu(DirectObject.DirectObject):
         props = WindowProperties()
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        Player(2500)     
+        Player()     
     def showEndingCredits(self): #Function that show credits
         self.credits.show()
 class Game(DirectObject.DirectObject): #Class that control game features - main class  
-    def __init__(self, firsttime, score): #Class constructor
-        self.firstRun = firsttime   
+    def __init__(self): #Class constructor  
         #Add game over sound
         self.gameOverSound = loader.loadSfx("smas44.mp3")
         self.gameOverSound.setVolume(4)
-        self.gameOverSound.setPlayRate(1)
-        
-        if self.firstRun == 1:
-            self.startScore = 270710
-            self.actualScore = self.startScore
-            MainMenu()
-            
-            props = WindowProperties()
-            props.setCursorHidden(1)
-            base.win.requestProperties(props)
-            render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
-            base.camLens.setFar(5100)
-            base.camLens.setFov(100)
-            base.cTrav = CollisionTraverser('ctrav')
-            base.cTrav.setRespectPrevTransform(True)
-            
-            base.enableParticles()
-            self.loadLevel(1)
-            self.msg = MessageManager()
-            
-            self.accept('player-death', self.evtPlayerDeath)
-            self.accept('game-levelwin', self.evtLevelWin)
-        else:
-            self.actualScore = score                         
+        self.gameOverSound.setPlayRate(1)            
+        MainMenu()
+        props = WindowProperties()
+        props.setCursorHidden(1)
+        base.win.requestProperties(props)
+        render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
+        base.camLens.setFar(5100)
+        base.camLens.setFov(100)
+        base.cTrav = CollisionTraverser('ctrav')
+        base.cTrav.setRespectPrevTransform(True)            
+        base.enableParticles()
+        self.loadLevel(1)
+        self.msg = MessageManager()   
+        self.accept('player-death', self.evtPlayerDeath)
+        self.accept('game-levelwin', self.evtLevelWin)
+                         
     def evtPlayerDeath(self): #Function that controls the player's death
         self.msg.addMessage("Game Over", 6)
         props = WindowProperties() #enable cursor after death
@@ -680,7 +678,7 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.LevelWinBGFrame = DirectFrame(parent=render2d, image="media/LevelWinScreen.jpg", sortOrder=(-1))
         self.LevelWinFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.LevelWinHeadline = DirectLabel(parent=self.LevelWinFrame, text="PARABENS!", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
-        self.LevelWinHeadline2 = DirectLabel(parent=self.LevelWinFrame, text="Score: \n"+str(self.actualScore), scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0))
+        self.LevelWinHeadline2 = DirectLabel(parent=self.LevelWinFrame, text="Score: \n"+str(actualScore), scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0))
         self.startButton = DirectButton(parent=self.LevelWinFrame, text=">>> Next", command=self.LoadNextLevel, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         self.LevelWinIsOpened = 1
         print "############## LEVEL WIN: Frame ABERTO ##############" 
@@ -712,14 +710,15 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.loadingFrame.destroy()
         self.loadingBGFrame.destroy()
     def loadLevel(self, id): #Function that controls the player's death
+        global firstRun
         self.id = id
         self.showLoadingScreen()
         if self.id == 1:
             print "############## 1.Primeira Fase ##############"
-            if self.firstRun == 1:
+            if firstRun == 1:
                 self.environment = Environment()
-                self.firstRun = 0
-            Player(self.actualScore)
+                firstRun = 0
+            Player()
             self.hideLoadingScreen()
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor

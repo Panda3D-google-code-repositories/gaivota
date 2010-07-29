@@ -840,7 +840,7 @@ class Credits(DirectObject.DirectObject):
         self.frame.hide()
 class IntroMovie(DirectObject.DirectObject):  
     def __init__(self): #Class constructor        
-        MEDIAFILE="media/IntroMovie54.avi"
+        MEDIAFILE="media/IntroMovie169.avi"
         #base.disableMouse()
         base.setBackgroundColor(0,0,0)
 
@@ -851,7 +851,7 @@ class IntroMovie(DirectObject.DirectObject):
         # Set up a fullscreen card to set the video texture on.
         self.cm = CardMaker("FullscreenCard");
         self.cm.setFrameFullscreenQuad()
-        self.cm.setUvRange(self.tex)
+        #self.cm.setUvRange(self.tex)
         self.card = NodePath(self.cm.generate())
         self.card.reparentTo(render2d)
         self.card.setTexture(self.tex)

@@ -6,7 +6,7 @@ Marco ~ Julho de 2010
 Authors: Filipe Yamamoto, Fabio Castanheira, Miguel Fernandes
 Site: http://code.google.com/p/gaivota/
 Blog: http://gaivotagame.blogspot.com
-Version: 0.06 (Alpha)
+Version: 0.07 (Alpha)
 
 Check out our site to see project details
 '''
@@ -92,10 +92,9 @@ class Environment(DirectObject.DirectObject): #Class environment for construct e
         # this flag will let the collision system treat collision test for objects colliding into the terrain
         # since the terrain has no collisionNode attached, it is necessary to set the mask
         self.roomCol.setCollideMask(BitMask32.allOn())
-        self.roomCol.flattenLight()
-        
+        self.roomCol.flattenLight()       
 class Player(object, DirectObject.DirectObject): #Class Player for the airplane
-    def __init__(self): #Class constructor
+    def __init__(self, score): #Class constructor
         self.node = 0 #the player main node
         self.modelNode = 0 #the node of the actual model
         self.cNode = 0 #the player collision node attached to node
@@ -119,8 +118,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.msg = MessageManager()       
         self.roll = 0
         self.camHeight = 0
-        self.startScore = 270710
-        self.thisScore = OnscreenText(text = 'Score: '+str(self.startScore), pos = (1.34, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
+        self.actualScore = score
+        self.thisScore = OnscreenText(text = 'Score: '+str(self.actualScore), pos = (1.32, 0.95), scale = 0.07, fg=(1,1,1,1), bg=(0.2,0.2,0.2,0.4), align=TextNode.ARight)
         self.death = 0
         
         self.ultimaColisao = "InicioUltimaColisao"
@@ -290,8 +289,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         # move where the keys set it
         self.node.setPos(self.node,Vec3(0,1.0*globalClock.getDt()*self.speed,0))
         # update scoring system
-        self.startScore = self.startScore - (50 * globalClock.getDt())
-        self.thisScore.setText('Score: '+str(self.startScore))
+        self.actualScore = self.actualScore - int((100 * globalClock.getDt()))
+        self.thisScore.setText('Score: '+str(self.actualScore))
         return task.cont  
     def explode(self): #Function that control the explosion of the airplane
         self.ignoreAll()
@@ -320,7 +319,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
         
-        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')
+        self.deleteTask = taskMgr.doMethodLater(2, self.deleteTask, 'delete task') # will delete Player within 1 second
     def beatLevel(self): #Function that control the explosion of the airplane
         self.ignoreAll()
         self.cNode.setIntoCollideMask(BitMask32.allOff())
@@ -330,7 +329,8 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.moveTask = 0
         self.mouseTask = 0
         
-        #add explosion sound
+        self.MusicSound.stop()
+        #Add end of level music
         self.audio3d = Audio3DManager.Audio3DManager(base.sfxManagerList[0], base.camera)
         self.audio3d.setDropOffFactor(0.2)
         self.Sound = self.audio3d.loadSfx('FF7Fanfare.mp3')
@@ -338,9 +338,9 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.audio3d.attachSoundToObject( self.Sound, self.node )
         self.Sound.play()
         
+        Game(0, self.actualScore)
         messenger.send( 'game-levelwin' )
-        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')
-        #self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
+        self.deleteTask = taskMgr.doMethodLater(4, self.deleteTask, 'delete task')     
     def zoomTask(self, task): #Function for zoom
         if base.camera.getY() != self.zoom and self.freeLook == False:
             base.camera.setY( base.camera.getY()+ (self.zoom- base.camera.getY())*globalClock.getDt()*2 )
@@ -580,7 +580,7 @@ class StartMenu(DirectObject.DirectObject): #Class for main menu
         messenger.send( "startMenuClosed" ) # send an event for the player class   
     def doStartGame(self): #Function that show graphic settings
         self.hideMenu()
-        Game()     
+        Game(1,0)     
     def showCredits(self): #Function that show credits
         self.credits.show()
 class MainMenu(DirectObject.DirectObject):
@@ -633,48 +633,54 @@ class GameOverMenu(DirectObject.DirectObject):
         props = WindowProperties()
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        Player()     
+        Player(2500)     
     def showEndingCredits(self): #Function that show credits
         self.credits.show()
 class Game(DirectObject.DirectObject): #Class that control game features - main class  
-    def __init__(self): #Class constructor
-        MainMenu()
-        self.showLoadingScreen()
-        props = WindowProperties()
-        props.setCursorHidden(1)
-        base.win.requestProperties(props)
-        render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
-        base.camLens.setFar(5100)
-        base.camLens.setFov(100)        
-
-        base.cTrav = CollisionTraverser('ctrav')
-        base.cTrav.setRespectPrevTransform(True)
-        base.enableParticles()
-        
-        self.loadLevel(1)
-        self.hideLoadingScreen()
-        self.msg = MessageManager()
-        
-        self.accept('player-death', self.evtPlayerDeath)
-        self.accept('game-levelwin', self.evtLevelWin)
-        
+    def __init__(self, firsttime, score): #Class constructor
+        self.firstRun = firsttime   
         #Add game over sound
         self.gameOverSound = loader.loadSfx("smas44.mp3")
         self.gameOverSound.setVolume(4)
-        self.gameOverSound.setPlayRate(1)                         
+        self.gameOverSound.setPlayRate(1)
+        
+        if self.firstRun == 1:
+            self.startScore = 270710
+            self.actualScore = self.startScore
+            MainMenu()
+            self.showLoadingScreen()
+            props = WindowProperties()
+            props.setCursorHidden(1)
+            base.win.requestProperties(props)
+            render.setAntialias(AntialiasAttrib.MAuto) #anti aliasing
+            base.camLens.setFar(5100)
+            base.camLens.setFov(100)
+            base.cTrav = CollisionTraverser('ctrav')
+            base.cTrav.setRespectPrevTransform(True)
+            
+            base.enableParticles()
+            self.loadLevel(1)
+            self.hideLoadingScreen()
+            self.msg = MessageManager()
+            
+            self.accept('player-death', self.evtPlayerDeath)
+            self.accept('game-levelwin', self.evtLevelWin)
+        else:
+            self.actualScore = score                         
     def evtPlayerDeath(self): #Function that controls the player's death
         self.msg.addMessage("Game Over", 6)
         props = WindowProperties() #enable cursor after death
         props.setCursorHidden(0)
         base.win.requestProperties(props)
         self.gameOverSound.play()
-        GameOverMenu()         
-    def evtLevelWin(self): #Function that controls the player's death
+        GameOverMenu()   
+    def evtLevelWin(self): 
         print "############## LEVEL WIN: Passou de fase ##############"
         self.LevelWinBGFrame = DirectFrame(parent=render2d, image="media/LevelWinScreen.jpg", sortOrder=(-1))
         self.LevelWinFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.LevelWinHeadline = DirectLabel(parent=self.LevelWinFrame, text="PARABENS!", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
-        self.startButton = DirectButton(parent=self.LevelWinFrame, text="Next", command=self.LoadNextLevel, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
+        self.LevelWinHeadline2 = DirectLabel(parent=self.LevelWinFrame, text="Score: \n"+str(self.actualScore), scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0))
+        self.startButton = DirectButton(parent=self.LevelWinFrame, text=">>> Next", command=self.LoadNextLevel, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         self.LevelWinIsOpened = 1
         print "############## LEVEL WIN: Frame ABERTO ##############" 
         props = WindowProperties() #enable cursor after death
@@ -693,23 +699,28 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         props = WindowProperties() #enable cursor after death
         props.setCursorHidden(1)
         base.win.requestProperties(props)
-        Player()
+        #Player()
         #self.showLoadingScreen()
         self.loadLevel(1)
         #self.hideLoadingScreen()
     def showLoadingScreen(self): #Function that controls the player's death
         print "############## LOADING SCREEN: Fase esta sendo carregada ##############"
-        self.loadingFrame = DirectFrame(parent=render2d, image="media/LoadingScreen.jpg", sortOrder=(-1))        
+        self.loadingBGFrame = DirectFrame(parent=render2d, image="media/LoadingScreen.jpg", sortOrder=(-1))
+        self.loadingFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
+        self.loadingHeadline = DirectLabel(parent=self.loadingFrame, text="Loading...", scale=0.085, frameColor=(0,0,0,0), pos=(01,0,-0.5))        
         #self.loadingFrame.show()
     def hideLoadingScreen(self): #Function that controls the player's death
         print "############## LOADING SCREEN: Fase terminou de ser carregada ##############"        
         self.loadingFrame.destroy()
+        self.loadingBGFrame.destroy()
     def loadLevel(self, id): #Function that controls the player's death
         self.id = id
         if self.id == 1:
             print "############## 1.Primeira Fase ##############"
-            self.environment = Environment()
-            Player()
+            if self.firstRun == 1:
+                self.environment = Environment()
+                self.firstRun = 0
+            Player(self.actualScore)
 class GraphicsSettings(DirectObject.DirectObject): #Class for graphic settings  
     def __init__(self): #Class contructor
         #available resolutions and multisampling levels
@@ -816,7 +827,7 @@ class Credits(DirectObject.DirectObject):
         
         self.Text = DirectLabel(
                                       parent=self.frame, 
-                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.06 (Pre-Alpha)\n\nBased on Akuryou's Flight game", 
+                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.07 (Alpha)\n\nBased on Akuryou's Flight game", 
                                       scale=0.04, 
                                       frameColor=(0,0,0,0), 
                                       pos=(-0.48,0,0.35),

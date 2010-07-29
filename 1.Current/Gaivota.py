@@ -105,7 +105,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         self.contrail2.setTransparency(TransparencyAttrib.MDual)
         self.landing = False
         self.freeLook = False
-        self.speed = 10
+        self.speed = 50
         self.speedMax = 100
         self.agility = 3
         self.HP = 10
@@ -189,12 +189,12 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         base.camera.setPos(0,self.zoom,2)
         base.camera.lookAt(self.aimNode)
     def addEvents(self):#Functions for airplane events
-        self.accept( "wheel_up" , self.evtSpeedUp )
-        self.accept( "wheel_down" , self.evtSpeedDown )
+        #self.accept( "wheel_up" , self.evtSpeedUp )#DEBUG
+        #self.accept( "wheel_down" , self.evtSpeedDown )#DEBUG
         self.accept('hit',self.evtHit)
         self.accept('f',self.evtFreeLookON)
         self.accept('f-up',self.evtFreeLookOFF)
-        self.accept('mouse3',self.evtBoostOn)
+        #self.accept('mouse3',self.evtBoostOn) #DEBUG
         self.accept("menuOpen", self.evtMenuOpen)
         self.accept("menuClosed", self.evtMenuClose)
     def addCollisions(self): #Functions that add collisions for the airplane

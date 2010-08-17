@@ -6,7 +6,7 @@ Marco ~ Julho de 2010
 Authors: Filipe Yamamoto, Fabio Castanheira, Miguel Fernandes
 Site: http://code.google.com/p/gaivota/
 Blog: http://gaivotagame.blogspot.com
-Version: 0.07 (Alpha)
+Version: 0.08 (Beta)
 
 Check out our site to see project details
 '''
@@ -379,15 +379,15 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
         if entry.getFromNodePath().getName() == "playerDuto": #if it's the collision ray
             self.ultimaColisao = self.atualColisao
             self.atualColisao = entry.getIntoNodePath().getName()
-            print "Ultima Colisao: "+self.ultimaColisao +" | Atual Colisao: " +self.atualColisao
+            #print "Ultima Colisao: "+self.ultimaColisao +" | Atual Colisao: " +self.atualColisao #Activate this when debugging
             if self.atualColisao == "duto": #Plane entering wind area
-                print "ENTROU NO VENTO"
+                #print "ENTROU NO VENTO"  #Activate this when debugging
                 #self.msg.addMessage("ENTROU NO VENTO", 1) #DEBUG
                 self.vento=LinearVectorForce(0,0,50)
                 self.gravityFN.addForce(self.vento)
                 self.gNode.getPhysical(0).addLinearForce(self.vento)
             if self.ultimaColisao == "duto" and self.atualColisao != "duto": #Plane entering wind area
-                print "SAIU DO VENTO"
+                #print "SAIU DO VENTO"  #Activate this when debugging
                 #self.msg.addMessage("SAIU DO VENTO", 1) #DEBUG
                 self.vento=LinearVectorForce(0,0,-65)
                 self.gravityFN.addForce(self.vento)
@@ -401,7 +401,7 @@ class Player(object, DirectObject.DirectObject): #Class Player for the airplane
                     self.engineSound.stop() #control volume
                     self.MusicSound.setVolume(0.5) #control volume
                     #self.msg.addMessage("FINAL DA FASE", 3) #DEBUG
-                    print "FINAL DA FASE"
+                    #print "FINAL DA FASE" #Activate this when debugging
             else:                  
                     self.myImage.hide() #hide cursor image during death animation
                     self.explode()
@@ -674,14 +674,14 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.gameOverSound.play()
         GameOverMenu()   
     def evtLevelWin(self): 
-        print "############## LEVEL WIN: Passou de fase ##############"
+        #print "############## LEVEL WIN: Passou de fase ##############"  #Activate this when debugging
         self.LevelWinBGFrame = DirectFrame(parent=render2d, image="media/LevelWinScreen.jpg", sortOrder=(-1))
         self.LevelWinFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.LevelWinHeadline = DirectLabel(parent=self.LevelWinFrame, text="PARABENS!", scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0.3))
         self.LevelWinHeadline2 = DirectLabel(parent=self.LevelWinFrame, text="Score: \n"+str(actualScore), scale=0.085, frameColor=(0,0,0,0), pos=(0,0,0))
         self.startButton = DirectButton(parent=self.LevelWinFrame, text=">>> Next", command=self.LoadNextLevel, pos=(1,0,-0.5), text_scale=0.08, text_fg=(1,1,1,1), text_align=TextNode.ACenter, borderWidth=(0.005,0.005), frameSize=(-0.25, 0.25, -0.03, 0.06), frameColor=(0.8,0.8,0.8,0))
         self.LevelWinIsOpened = 1
-        print "############## LEVEL WIN: Frame ABERTO ##############" 
+        #print "############## LEVEL WIN: Frame ABERTO ##############" #Activate this when debugging 
         props = WindowProperties() #enable cursor after death
         props.setCursorHidden(0)
         base.win.requestProperties(props)       
@@ -690,9 +690,9 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
             self.LevelWinBGFrame.destroy()
             self.LevelWinFrame.destroy()
             self.LevelWinIsOpened = 0
-            print "############## LEVEL WIN: Frame FECHADO ##############"
-            print self.LevelWinIsOpened             
-        print "############## Carrega proxima fase ##############"
+            #print "############## LEVEL WIN: Frame FECHADO ##############"  #Activate this when debugging
+            #print self.LevelWinIsOpened  #Activate this when debugging             
+        #print "############## Carrega proxima fase ##############"  #Activate this when debugging
         #Player.deleteTask()
         #Player.deleteTask = taskMgr.doMethodLater(4, Player.deleteTask, 'delete task')
         props = WindowProperties() #enable cursor after death
@@ -700,13 +700,13 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         base.win.requestProperties(props)
         self.loadLevel(1)
     def showLoadingScreen(self): #Function that controls the player's death
-        print "############## LOADING SCREEN: Fase esta sendo carregada ##############"
+        #print "############## LOADING SCREEN: Fase esta sendo carregada ##############"  #Activate this when debugging
         self.loadingBGFrame = DirectFrame(parent=render2d, image="media/LoadingScreen.jpg", sortOrder=(-1))
         self.loadingFrame = DirectFrame(frameSize=(-0.5, 0.5, -0.5, 0.5), frameColor=(0.8,0.8,0.8,0), pos=(0,0,0))
         self.loadingHeadline = DirectLabel(parent=self.loadingFrame, text="Loading...", scale=0.085, frameColor=(0,0,0,0), pos=(01,0,-0.5))
         #self.loadingFrame.show()
     def hideLoadingScreen(self): #Function that controls the player's death
-        print "############## LOADING SCREEN: Fase terminou de ser carregada ##############"        
+        #print "############## LOADING SCREEN: Fase terminou de ser carregada ##############"  #Activate this when debugging        
         self.loadingFrame.destroy()
         self.loadingBGFrame.destroy()
     def loadLevel(self, id): #Function that controls the player's death
@@ -714,7 +714,7 @@ class Game(DirectObject.DirectObject): #Class that control game features - main 
         self.id = id
         self.showLoadingScreen()
         if self.id == 1:
-            print "############## 1.Primeira Fase ##############"
+            #print "############## 1.Primeira Fase ##############"  #Activate this when debugging
             if firstRun == 1:
                 self.environment = Environment()
                 firstRun = 0
@@ -826,7 +826,7 @@ class Credits(DirectObject.DirectObject):
         
         self.Text = DirectFrame(
                                       parent=self.frame, 
-                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.07 (Alpha)\n\nBased on Akuryou's Flight game", 
+                                      text="GAIVOTA\n\nJogo criado para COS600 - Animacao e Jogos\nEngenharia de Computacao e Informacao (ECI)\nUniversidade Federal do Rio de Janeiro (UFRJ) | Brazil\nMarch ~ July/2010\n\nAuthors: \nFilipe Yamamoto, \nFabio Castanheira, \nMiguel Fernandes\n\nCheck out our site to see project details\nhttp://code.google.com/p/gaivota/\n\nVersion: 0.08 (Beta)\n\nBased on Akuryou's Flight game", 
                                       scale=0.04, 
                                       frameColor=(0,0,0,0), 
                                       pos=(-0.48,0,0.35),
